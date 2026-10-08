@@ -1,4 +1,7 @@
-Run,CommandedSpeedReference_rps,LoggedSteadyStateReference_rps,SteadyStateSpeed_rps,SteadyStateError_pct,SimulationStopTime_s,SteadyStateWindow_s,SamplesCsv
-1,10,9.99999999999998,9.99999999999998,1.77635683940025e-13,5,1,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_plus_10_rps.csv
-2,15,15,15,3.3158661002138e-13,5,1,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_plus_15_rps.csv
-3,-15,-15,-15,3.3158661002138e-13,5,1,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_minus_15_rps.csv
+Run,CommandedSpeedReference_rps,LoggedSteadyStateReference_rps,SteadyStateSpeed_rps,SteadyStateError_pct,PeakSpeed_rps,Overshoot_pct,SettlingTime_s,MaximumControllerVoltage_V,MinimumControllerVoltage_V,Positive12VSaturationOccurred,Negative12VSaturationOccurred,SaturationCumulativeTime_s,SimulationStopTime_s,SteadyStateWindow_s,SettlingBand_pct,SamplesCsv
+1,5,4.99999999999999,4.99999999999999,1.77635683940025e-13,4.99999999999995,0,0.2,0.276781887167363,0,0,0,0,5,1,2,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_plus_5_rps.csv
+2,10,9.99999999999998,9.99999999999998,1.77635683940025e-13,9.99999999999991,0,0.2,0.553563774334726,0,0,0,0,5,1,2,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_plus_10_rps.csv
+3,15,15,15,3.3158661002138e-13,14.9999999999998,0,0.2,0.830345661502091,0,0,0,0,5,1,2,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_plus_15_rps.csv
+4,-5,-4.99999999999999,-4.99999999999999,1.77635683940025e-13,-4.99999999999995,0,0.2,0,-0.276781887167363,0,0,0,5,1,2,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_minus_5_rps.csv
+5,-10,-9.99999999999998,-9.99999999999998,1.77635683940025e-13,-9.99999999999991,0,0.2,0,-0.553563774334726,0,0,0,5,1,2,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_minus_10_rps.csv
+6,-15,-15,-15,3.3158661002138e-13,-14.9999999999998,0,0.2,0,-0.830345661502091,0,0,0,5,1,2,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_minus_15_rps.csv

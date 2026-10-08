@@ -2,26 +2,42 @@ function [summaryTable, runData] = run_mil_baseline(varargin)
 %RUN_MIL_BASELINE Repeatedly run the AS2308 MIL model at fixed speed references.
 %
 %   [SUMMARYTABLE, RUNDATA] = RUN_MIL_BASELINE() runs the model for
-%   +10, +15, and -15 rps. Each simulation runs for 5 seconds and the
+%   +5, +10, +15, -5, -10, and -15 rps. Each simulation runs for 5 seconds and the
 %   final 1 second is used to calculate the steady-state values.
 %
 %   Name-value options:
 %     'References_rps'           Numeric vector of nonzero references
 %     'StopTime_s'               Simulation stop time in seconds
 %     'SteadyStateWindow_s'      Final time window used for averaging
+%     'SettlingBand_pct'         Symmetric settling band around the command
 %     'ResultsDirectory'         Directory in which CSV files are written
+%
+%   Metric definitions:
+%     steady-state speed = mean actual speed over the final steady-state window
+%     steady-state error = (command - steady-state speed) / command * 100
+%     peak speed         = farthest speed reached in the command direction
+%     overshoot          = max(0, (directed peak - abs(command)) /
+%                              abs(command) * 100)
+%     settling time      = first time after which actual speed remains inside
+%                          command +/- SettlingBand_pct for the rest of the run
+%     saturation time    = time integral of the +/-Vdc saturation indicator
+%
+%   SettlingBand_pct defines a measurement band only. It is not an
+%   acceptance criterion and this function performs no PASS/FAIL decision.
 %
 %   The model file is not modified. Input block parameters and signal
 %   logging are overridden only for the duration of this function.
 
     parser = inputParser;
     parser.FunctionName = mfilename;
-    addParameter(parser, 'References_rps', [10, 15, -15], ...
+    addParameter(parser, 'References_rps', [5, 10, 15, -5, -10, -15], ...
         @(x) isnumeric(x) && isvector(x) && all(isfinite(x)) && all(x ~= 0));
     addParameter(parser, 'StopTime_s', 5, ...
         @(x) isnumeric(x) && isscalar(x) && isfinite(x) && x > 0);
     addParameter(parser, 'SteadyStateWindow_s', 1, ...
         @(x) isnumeric(x) && isscalar(x) && isfinite(x) && x > 0);
+    addParameter(parser, 'SettlingBand_pct', 2, ...
+        @(x) isnumeric(x) && isscalar(x) && isfinite(x) && x > 0 && x < 100);
     addParameter(parser, 'ResultsDirectory', '', ...
         @(x) ischar(x) || (isstring(x) && isscalar(x)));
     parse(parser, varargin{:});
@@ -89,6 +105,14 @@ function [summaryTable, runData] = run_mil_baseline(varargin)
     steadyStateReference = zeros(numberOfRuns, 1);
     steadyStateSpeed = zeros(numberOfRuns, 1);
     steadyStateError = zeros(numberOfRuns, 1);
+    peakSpeed = zeros(numberOfRuns, 1);
+    overshoot = zeros(numberOfRuns, 1);
+    settlingTime = NaN(numberOfRuns, 1);
+    maximumControllerVoltage = zeros(numberOfRuns, 1);
+    minimumControllerVoltage = zeros(numberOfRuns, 1);
+    positiveSaturationOccurred = false(numberOfRuns, 1);
+    negativeSaturationOccurred = false(numberOfRuns, 1);
+    saturationCumulativeTime = zeros(numberOfRuns, 1);
     samplesCsv = strings(numberOfRuns, 1);
     runData = repmat(struct( ...
         'Reference_rps', [], 'Samples', table(), 'CsvFile', ''), numberOfRuns, 1);
@@ -158,6 +182,48 @@ function [summaryTable, runData] = run_mil_baseline(varargin)
         steadyStateError(runIndex) = 100 * ...
             (commandedReference - steadyStateSpeed(runIndex)) / commandedReference;
 
+        % Direction-normalized peak calculation makes the same formula valid
+        % for positive and negative commands. For example, the directional
+        % peak for -10 rps is max(-actualSpeed), and PeakSpeed_rps is then
+        % converted back to a negative physical speed.
+        commandDirection = sign(commandedReference);
+        directedPeak = max(commandDirection * actualSpeed_rps, [], 'omitnan');
+        peakSpeed(runIndex) = commandDirection * directedPeak;
+        overshoot(runIndex) = max(0, 100 * ...
+            (directedPeak - abs(commandedReference)) / abs(commandedReference));
+
+        % Settling time is measured against a symmetric percentage band
+        % around the commanded speed. It is the first sample after the last
+        % out-of-band sample. NaN means the response did not settle by the
+        % simulation stop time.
+        settlingBand_rps = abs(commandedReference) * ...
+            options.SettlingBand_pct / 100;
+        outsideSettlingBand = ~isfinite(actualSpeed_rps) | ...
+            abs(actualSpeed_rps - commandedReference) > settlingBand_rps;
+        lastOutsideIndex = find(outsideSettlingBand, 1, 'last');
+        if isempty(lastOutsideIndex)
+            settlingTime(runIndex) = time(1);
+        elseif lastOutsideIndex < numel(time)
+            settlingTime(runIndex) = time(lastOutsideIndex + 1);
+        end
+
+        maximumControllerVoltage(runIndex) = max( ...
+            controllerVoltage_v, [], 'omitnan');
+        minimumControllerVoltage(runIndex) = min( ...
+            controllerVoltage_v, [], 'omitnan');
+
+        % The controller saturation limits are the unchanged +/-Vdc values
+        % from AS2308_calculate_pi_control_cc.m (Vdc = 12 V). A small numeric
+        % tolerance avoids missing a clamped sample due to round-off.
+        saturationTolerance_v = max(1e-9, 100 * eps(Vdc));
+        positiveSaturation = controllerVoltage_v >= Vdc - saturationTolerance_v;
+        negativeSaturation = controllerVoltage_v <= -Vdc + saturationTolerance_v;
+        saturationIndicator = positiveSaturation | negativeSaturation;
+        positiveSaturationOccurred(runIndex) = any(positiveSaturation);
+        negativeSaturationOccurred(runIndex) = any(negativeSaturation);
+        saturationCumulativeTime(runIndex) = trapz( ...
+            time, double(saturationIndicator));
+
         runFileName = sprintf('mil_run_%s_rps.csv', ...
             localReferenceLabel(commandedReference));
         runFile = fullfile(resultsDirectory, runFileName);
@@ -172,17 +238,31 @@ function [summaryTable, runData] = run_mil_baseline(varargin)
     runNumber = (1:numberOfRuns).';
     stopTime = repmat(options.StopTime_s, numberOfRuns, 1);
     steadyStateWindow = repmat(options.SteadyStateWindow_s, numberOfRuns, 1);
+    settlingBand = repmat(options.SettlingBand_pct, numberOfRuns, 1);
     summaryTable = table( ...
         runNumber, references, steadyStateReference, steadyStateSpeed, ...
-        steadyStateError, stopTime, steadyStateWindow, samplesCsv, ...
+        steadyStateError, peakSpeed, overshoot, settlingTime, ...
+        maximumControllerVoltage, minimumControllerVoltage, ...
+        positiveSaturationOccurred, negativeSaturationOccurred, ...
+        saturationCumulativeTime, stopTime, steadyStateWindow, ...
+        settlingBand, samplesCsv, ...
         'VariableNames', { ...
             'Run', ...
             'CommandedSpeedReference_rps', ...
             'LoggedSteadyStateReference_rps', ...
             'SteadyStateSpeed_rps', ...
             'SteadyStateError_pct', ...
+            'PeakSpeed_rps', ...
+            'Overshoot_pct', ...
+            'SettlingTime_s', ...
+            'MaximumControllerVoltage_V', ...
+            'MinimumControllerVoltage_V', ...
+            'Positive12VSaturationOccurred', ...
+            'Negative12VSaturationOccurred', ...
+            'SaturationCumulativeTime_s', ...
             'SimulationStopTime_s', ...
             'SteadyStateWindow_s', ...
+            'SettlingBand_pct', ...
             'SamplesCsv'});
 
     summaryFile = fullfile(resultsDirectory, 'mil_summary.csv');

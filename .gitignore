@@ -14,3 +14,6 @@ Desktop.ini
 
 # Generated raw simulation results
 results/mil_run_*.csv
+
+# Reference filter raw time-series results
+results/reference_filter_*_rps.csv
