@@ -1,0 +1,3 @@
+Direction,DirectionSign,LastUnsaturatedMagnitude_rps,FirstSaturatedMagnitude_rps,LastUnsaturatedReference_rps,FirstSaturatedReference_rps,FinalResolution_rps
+Positive,1,16.6,16.65,16.6,16.65,0.05
+Negative,-1,16.6,16.65,-16.6,-16.65,0.05

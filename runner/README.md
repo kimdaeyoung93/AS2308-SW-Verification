@@ -142,3 +142,66 @@ Overshoot와 settling time은 baseline characterization과 동일한 정의를 �
 두 run CSV에는 time, filtered 또는 bypassed reference, actual speed, controller
 voltage가 저장된다. Summary에는 peak speed, overshoot, settling time 및 controller
 voltage 최댓값/최솟값이 저장된다.
+
+## Direction reversal characterization
+
+`characterize_direction_reversal.m`은 2초 시점의 `+15 -> -15 rps`와
+`-15 -> +15 rps` 방향 전환을 다음 configuration에서 각각 실행한다.
+
+- **NominalConfiguration**: 기존 reference filter `20/(s+20)` 적용
+- **FilterBypassCharacterization**: reference filter를 unity path `1`로 우회
+
+```matlab
+[reversalTable, reversalRunData] = characterize_direction_reversal();
+```
+
+Final steady-state speed는 마지막 1초의 actual speed 평균이다. Steady-state
+error는 최종 reference를 기준으로 계산한다. Post-reversal settling time은 reversal
+시점부터 actual speed가 최종 reference의 ±2% band에 들어가고 종료까지 다시
+벗어나지 않는 최초 sample까지의 경과시간이다. Controller voltage 최댓값/최솟값,
+±12 V saturation 여부와 saturation 누적시간은 reversal 이후 구간에서 계산한다.
+Saturation 누적시간은 saturation indicator의 사다리꼴 시간 적분이다.
+
+생성 파일:
+
+- `results/direction_reversal_summary.csv`
+- `results/direction_reversal_nominal_+15_to_-15.csv` 등 run별 raw CSV 4개
+
+Raw CSV는 `.gitignore`로 summary와 분리한다.
+
+## Saturation threshold characterization
+
+`characterize_saturation_threshold.m`은 reference filter bypass 조건에서 positive와
+negative step magnitude를 증가시키며 controller output이 처음 ±12 V에 도달하는
+구간을 찾는다.
+
+```matlab
+[scanTable, thresholdTable] = characterize_saturation_threshold();
+```
+
+기본 coarse scan은 15~20 rps를 0.5 rps 간격으로 수행한다. 최초 포화 coarse
+구간을 발견하면 그 구간 내부를 0.05 rps 간격으로 다시 확인한다. 다음 옵션으로
+코드 수정 없이 범위와 해상도를 변경할 수 있다.
+
+```matlab
+[scanTable, thresholdTable] = characterize_saturation_threshold( ...
+    'CoarseStartMagnitude_rps', 15, ...
+    'CoarseStopMagnitude_rps', 20, ...
+    'CoarseStep_rps', 0.5, ...
+    'FineStep_rps', 0.05, ...
+    'StopTime_s', 1);
+```
+
+Saturation은 controller voltage가 `+Vdc` 또는 `-Vdc`에 1e-9 V numeric
+tolerance 이내로 도달한 상태로 정의한다. 각 reference에서 명령 방향의 peak
+controller voltage, positive/negative saturation 여부와 saturation indicator의
+누적 적분시간을 저장한다.
+
+생성 파일:
+
+- `results/saturation_scan_summary.csv`: 모든 coarse/fine scan point
+- `results/saturation_threshold_intervals.csv`: 방향별 마지막 비포화 reference와
+  최초 포화 reference 구간
+
+두 characterization은 정상 Controller의 정량적 특성만 기록하며 PASS/FAIL 또는
+acceptance criterion을 생성하지 않는다.
