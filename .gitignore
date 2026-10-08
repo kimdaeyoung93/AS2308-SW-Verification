@@ -1,0 +1,13 @@
+# MATLAB / Simulink cache
+*.slxc
+slprj/
+codegen/
+
+# MATLAB temporary / autosave
+*.asv
+*.autosave
+*~
+
+# Windows
+Thumbs.db
+Desktop.ini
