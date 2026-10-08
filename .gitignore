@@ -11,3 +11,6 @@ codegen/
 # Windows
 Thumbs.db
 Desktop.ini
+
+# Generated raw simulation results
+results/mil_run_*.csv
