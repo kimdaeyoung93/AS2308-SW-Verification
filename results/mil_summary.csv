@@ -1,0 +1,4 @@
+Run,CommandedSpeedReference_rps,LoggedSteadyStateReference_rps,SteadyStateSpeed_rps,SteadyStateError_pct,SimulationStopTime_s,SteadyStateWindow_s,SamplesCsv
+1,10,9.99999999999998,9.99999999999998,1.77635683940025e-13,5,1,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_plus_10_rps.csv
+2,15,15,15,3.3158661002138e-13,5,1,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_plus_15_rps.csv
+3,-15,-15,-15,3.3158661002138e-13,5,1,C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\results\mil_run_minus_15_rps.csv
