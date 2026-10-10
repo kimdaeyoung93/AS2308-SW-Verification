@@ -1,8 +1,8 @@
-# AS2308 AI-Assisted MIL Verification Test Plan v1.0
+# AS2308 AI-Assisted MIL Verification Test Plan v1.1
 
 | 항목 | 내용 |
 |---|---|
-| 문서 버전 | 1.0 |
+| 문서 버전 | 1.1 |
 | 문서 상태 | Frozen |
 | Verification Level | MIL (Model-in-the-Loop) |
 | Requirements Source of Truth | `requirements/01_Requirements.md` |
@@ -21,7 +21,7 @@ AI/LLM은 최종 PASS/FAIL Oracle로 사용하지 않는다.
 
 ## 2. System Under Test and Verification Environment
 
-본 Test Plan은 Requirements v1.0의 정의를 그대로 참조하며, 세부 근거는 `requirements/01_Requirements.md`를 source of truth로 사용한다.
+본 Test Plan은 Requirements v1.1의 정의를 그대로 참조하며, 세부 근거는 `requirements/01_Requirements.md`를 source of truth로 사용한다.
 
 | 항목 | 정의 |
 |---|---|
@@ -29,9 +29,20 @@ AI/LLM은 최종 PASS/FAIL Oracle로 사용하지 않는다.
 | Verification Level | MIL (Model-in-the-Loop) |
 | Verification Plant | `G(s) = 2185.96 / (s + 17.76)` |
 | Plant Origin | 실제 AS2308 실험에서 식별된 first-order voltage-to-speed model |
-| Nominal Reference Filter | `20 / (s + 20)` |
+| Verification Reference Path | SpeedRef [rps] is applied to the Speed PI Controller after the required rps-to-rad/s unit conversion (`2*pi`), without a reference prefilter. |
 | Sample Time | `0.0004 s` |
 | Nominal Speed Reference Domain | 원칙적으로 `|SpeedRef| < 20 rps` |
+
+Verification signal path는 다음과 같다.
+
+```text
+SpeedRef [rps]
+  -> rps-to-rad/s unit conversion (2*pi)
+  -> Speed PI Controller (DUT)
+  -> G(s) = 2185.96 / (s + 17.76)
+```
+
+`2*pi` 블록은 rps를 rad/s로 변환하기 위해 유지되는 정상적인 필수 단위변환이며 reference prefilter가 아니다. 기존 AS2308 실습 모델의 `20 / (s + 20)` reference prefilter는 이번 MIL verification path에서 제외한다. 이는 기존 실습 모델의 타당성을 부정하는 것이 아니라 DUT인 Speed PI Controller의 tracking, transient response, actuator saturation 및 anti-windup behavior를 직접 검증하기 위한 baseline 결정이다.
 
 ### 2.1 Controller Design Constraints
 
@@ -70,7 +81,7 @@ AI/LLM은 최종 PASS/FAIL Oracle로 사용하지 않는다.
 
 ## 4. Requirement Set
 
-### 4.1 Frozen Requirements v1.0
+### 4.1 Frozen Requirements v1.1
 
 | Requirement ID | Requirement Group |
 |---|---|
@@ -91,7 +102,7 @@ AI/LLM은 최종 PASS/FAIL Oracle로 사용하지 않는다.
 | `ENV-REF-001` |
 | `ENV-RANGE-001` |
 
-Test Case 설계가 시작된 이후 Requirements v1.0은 변경하지 않는다. Requirement 변경이 불가피한 경우 기존 실험을 중단하고 새로운 document version으로 별도 관리한다.
+Test Case 설계가 시작된 이후 Requirements v1.1은 변경하지 않는다. Requirement 변경이 불가피한 경우 기존 실험을 중단하고 새로운 document version으로 별도 관리한다.
 
 ## 5. Verification Method Classification
 
@@ -117,7 +128,16 @@ Controller parameter 또는 구조를 직접 확인하는 방식이다.
 | `REQ-TRK-001` | Constant speed tracking behavior |
 | `REQ-DIR-001` | Positive/negative direction behavior |
 | `REQ-REV-001` | Direction-reversal behavior |
-| 필요 시 `REQ-AW-001` | Saturation stress behavior |
+| 필요 시 `REQ-AW-001` | SpeedRef stimulus로 actuator saturation을 발생시키고 controller output인 `Vcmd`와 recovery behavior를 관찰한다. 특정 recovery-time threshold는 추가하지 않는다. |
+
+### 5.3 Nominal Verification and Saturation Stress Verification
+
+| 구분 | 적용 원칙 |
+|---|---|
+| Nominal verification | `ENV-RANGE-001`에 따라 원칙적으로 `|SpeedRef| < 20 rps`인 정상 검증 조건을 사용한다. |
+| Saturation stress verification | Anti-windup 및 actuator saturation behavior를 관찰하기 위한 별도 stress condition으로 관리한다. 필요 시 nominal reference range 밖의 SpeedRef stimulus를 사용할 수 있다. |
+
+`Vcmd`는 시험 입력이 아니라 Speed PI Controller의 output이다. Saturation stress verification에서는 SpeedRef 등의 stimulus로 actuator saturation을 유발하고 `Vcmd` 및 recovery behavior를 관찰한다. 근거가 없는 recovery-time acceptance threshold는 생성하지 않는다.
 
 ## 6. Manual Test Case Design Protocol
 
@@ -185,11 +205,11 @@ Human과 AI Test Suite를 비교할 때 다음 조건을 동일하게 유지한�
 
 | 통제 항목 | 공통 조건 |
 |---|---|
-| Requirements | 동일한 Requirements v1.0 |
+| Requirements | 동일한 Requirements v1.1 |
 | DUT | 동일한 DUT |
 | Plant | 동일한 Plant |
 | Sample time | 동일한 sample time |
-| Reference filter | 동일한 nominal reference filter |
+| Reference path | 동일한 prefilter-free reference path (`SpeedRef [rps] -> 2*pi unit conversion -> controller`) |
 | Execution | 동일한 automated runner |
 | Oracle | 동일한 PASS/FAIL Oracle |
 | Faults | 동일한 Fault/Mutation Set |
@@ -293,8 +313,8 @@ Requirement ID는 `requirements/01_Requirements.md`의 값을 그대로 사용�
 
 실험은 다음 순서로 수행한다.
 
-1. Requirements v1.0 Freeze — 완료
-2. Test Plan v1.0 Freeze
+1. Requirements v1.1 Freeze
+2. Test Plan v1.1 Freeze
 3. Manual Test Case 작성
 4. Manual Test Suite Freeze
 5. AI Candidate Test Case 생성

@@ -1,8 +1,8 @@
-# AS2308 MIL Verification Requirements v1.0
+# AS2308 MIL Verification Requirements v1.1
 
 | 항목 | 내용 |
 |---|---|
-| 문서 버전 | 1.0 |
+| 문서 버전 | 1.1 |
 | 문서 상태 | Frozen |
 | 대상 | AS2308 BLDC Speed PI Controller MIL Verification |
 
@@ -16,7 +16,7 @@
 |---|---|
 | DUT | Speed PI Controller |
 | Verification Plant | `G(s) = 2185.96 / (s + 17.76)` |
-| Nominal Reference Filter | `20 / (s + 20)` |
+| Reference Path | SpeedRef [rps] is applied to the Speed PI Controller after the required rps-to-rad/s unit conversion (`2*pi`), without a reference prefilter. |
 | Simulation/control sample time | `0.0004 s` |
 
 Verification Plant는 실제 AS2308 실험에서 voltage와 angular velocity 데이터를 취득하고 least-squares 방식으로 식별했던 1차 voltage-to-speed model을 재사용한 것이다.
@@ -54,7 +54,7 @@ Derived Functional Requirement는 원 제조사 또는 OEM의 공식 제품 requ
 | Requirement | Project baseline의 Speed PI Controller는 `f_cs = 40 Hz` speed-loop design bandwidth를 기준으로 설계되어야 한다. |
 | Source | 실제 project baseline script `AS2308_calculate_pi_control_cc.m`의 `f_cs = 40` 및 `w_cs = 2*pi*f_cs` 정의 |
 | Rationale | `f_cs`는 기존 코드에서 speed loop의 bandwidth frequency design parameter로 명시되어 있다. |
-| Verification Method | Controller parameter 및 PI gain 계산 관계를 확인한다. 필요한 경우 reference filter를 bypass한 controller characterization을 보조 증거로 사용할 수 있다. |
+| Verification Method | Controller parameter 및 PI gain 계산 관계를 확인한다. 필요한 경우 reference prefilter 없이 필수 rps-to-rad/s 단위변환 (`2*pi`)을 거치는 reference path의 controller characterization을 보조 증거로 사용할 수 있다. |
 
 **Source Note:** 일부 강의자료 버전에는 `f_cs = 30 Hz`가 사용된 예제가 존재한다. 이번 프로젝트에서는 실제 사용한 baseline controller script의 값인 `40 Hz`를 project source of truth로 사용한다.
 
@@ -142,15 +142,16 @@ Plant는 speed-domain verification을 위한 reduced-order model이며 다음 �
 - Encoder dynamics
 - Detailed electrical transient
 
-### 5.3 ENV-REF-001 — Nominal Reference Filter
+### 5.3 ENV-REF-001 — Verification Reference Path
 
 | 항목 | 내용 |
 |---|---|
 | Environment ID | `ENV-REF-001` |
-| Configuration | Nominal configuration에서는 기존 reference filter `20 / (s + 20)`를 유지한다. |
-| Source | Original AS2308 speed-control Simulink block diagram |
+| Configuration | MIL verification baseline에서는 SpeedRef [rps]에 정상적으로 필요한 rps-to-rad/s 단위변환 (`2*pi`)을 적용한 뒤 Speed PI Controller에 입력한다. reference prefilter는 verification path에 존재하지 않는다. |
+| Source | Original AS2308 speed-control Simulink block diagram에는 `20 / (s + 20)` reference prefilter가 존재한다. 본 프로젝트에서는 SpeedRef가 필수 rps-to-rad/s 단위변환 (`2*pi`)만 거쳐 DUT인 Speed PI Controller에 입력되는 verification baseline을 사용한다. |
+| Rationale | Speed PI Controller 자체의 tracking, transient response, actuator saturation 및 anti-windup behavior를 직접 검증하기 위함이다. |
 
-강의자료에서 이 filter를 선택한 정확한 설계 이유는 명시적으로 확인되지 않았으므로 본 문서에서 추측하지 않는다.
+기존 reference prefilter가 포함된 AS2308 실습 모델 자체를 잘못된 모델로 해석하지 않는다. 강의자료에서 해당 filter를 선택한 정확한 설계 목적이 명시적으로 확인되지 않았으므로 이를 추측하지 않으며, motor protection을 위해 사용됐다는 내용을 source-backed fact로 표현하지 않는다.
 
 ### 5.4 ENV-RANGE-001 — Nominal Verification Reference Range
 
@@ -166,10 +167,11 @@ Plant는 speed-domain verification을 위한 reduced-order model이며 다음 �
 - 24 samples/electrical revolution 권장 기준은 약 `14.88 rps`이다.
 - 따라서 `+/-15 rps`는 기존 실습과 가까운 nominal verification point로 활용할 수 있다.
 - `+/-15 rps`를 motor의 공식 rated speed 또는 제품 operating limit이라고 표현하지 않는다.
+- 별도의 saturation stress verification에서는 anti-windup 및 actuator saturation behavior를 관찰하기 위해 nominal range와 구분된 stress condition을 사용할 수 있다.
 
 ## 6. Unsupported / Excluded Acceptance Criteria
 
-다음 값들은 기존 강의자료 또는 코드에서 공식 requirement로 확인되지 않았으므로 Requirements v1.0에 포함하지 않는다.
+다음 값들은 기존 강의자료 또는 코드에서 공식 requirement로 확인되지 않았으므로 Requirements v1.1에 포함하지 않는다.
 
 | 제외 항목 | 처리 원칙 |
 |---|---|
@@ -190,4 +192,10 @@ Manual Test Case와 AI-assisted Test Case를 추후 작성할 수 있도록 본 
 Requirement ID -> Test Case ID -> Execution Result -> Fault/Mutation Detection
 ```
 
-Requirements v1.0은 AS2308 MIL verification의 requirement 및 environment baseline을 freeze하기 위한 문서다. Characterization 결과를 제품 사양으로 변환하지 않으며, 본 문서의 Derived Functional Requirement를 현대차, OEM 또는 ISO 26262의 공식 제품 requirement로 표현하지 않는다.
+Requirements v1.1은 AS2308 MIL verification의 requirement 및 environment baseline을 freeze하기 위한 문서다. Characterization 결과를 제품 사양으로 변환하지 않으며, 본 문서의 Derived Functional Requirement를 현대차, OEM 또는 ISO 26262의 공식 제품 requirement로 표현하지 않는다.
+
+## 8. Revision Note
+
+### v1.1
+
+Reference prefilter를 verification path에서 제외하고 SpeedRef [rps]를 필수 rps-to-rad/s 단위변환 (`2*pi`) 후 Speed PI Controller에 입력하는 MIL baseline으로 변경했다. 기존 Requirement ID와 핵심 기능 요구사항은 유지한다.

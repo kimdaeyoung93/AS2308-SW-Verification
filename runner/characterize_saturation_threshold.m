@@ -39,7 +39,7 @@ function [scanTable, thresholdTable] = characterize_saturation_threshold(varargi
     runnerDirectory = fileparts(mfilename('fullpath'));
     repositoryRoot = fileparts(runnerDirectory);
     modelDirectory = fullfile(repositoryRoot, 'model');
-    modelName = 'AS2308_MIL_Baseline_v1';
+    modelName = 'AS2308_MIL_Baseline_v2';
     modelFile = fullfile(modelDirectory, [modelName, '.slx']);
     parameterScript = fullfile(modelDirectory, ...
         'AS2308_calculate_pi_control_cc.m');

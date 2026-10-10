@@ -1,7 +1,10 @@
 # AS2308 MIL 반복 실행기
 
-`run_mil_baseline.m`은 기존 `model/AS2308_MIL_Baseline_v1.slx`를 저장하거나
+`run_mil_baseline.m`은 현재 verification baseline인 `model/AS2308_MIL_Baseline_v2.slx`를 저장하거나
 수정하지 않고 다음 characterization 속도 지령을 순서대로 실행한다.
+
+v2 verification path에는 reference prefilter가 없으며, reference path는
+`SpeedRef [rps] -> 2*pi unit conversion -> Speed PI Controller` 구조이다.
 
 - +5 rps
 - +10 rps
@@ -115,8 +118,9 @@ quantization/measurement, motor electrical transient를 검증하는 모델은 �
 
 ## Reference filter transient 비교
 
-`compare_reference_filter.m`은 동일한 정상 Controller와 Plant에 +15 rps step을
-인가하고 다음 두 경우를 비교한다.
+`compare_reference_filter.m`은 기존 reference-filter characterization을 재현하기
+위한 historical/legacy script이다. 이 script는 `AS2308_MIL_Baseline_v1.slx`에서
+동일한 정상 Controller와 Plant에 +15 rps step을 인가하고 다음 두 경우를 비교한다.
 
 - baseline reference filter 적용: `20/(s+20)`
 - reference filter bypass: `1`
