@@ -1,0 +1,2 @@
+total_defined_mutants,valid_mutants,killed_mutants,survived_mutants,invalid_mutants,mutation_score_percent
+6,6,6,0,0,100
