@@ -13,6 +13,8 @@ function [segmentTable, testSummary, runData] = ...
 %   Name-value options:
 %     'PlateauDuration_s'  Duration of each plateau (default: 2)
 %     'RepeatCount'        Number of +15/-15 pairs (default: 3)
+%     'ModelName'          Simulink model name
+%                          (default: AS2308_MIL_Baseline_v3)
 %
 %   PlateauDuration_s and RepeatCount are test sequence execution
 %   parameters. They are not product performance requirements. The plateau
@@ -25,11 +27,15 @@ function [segmentTable, testSummary, runData] = ...
     addParameter(parser, 'RepeatCount', 3, ...
         @(x) isnumeric(x) && isreal(x) && isscalar(x) && ...
         isfinite(x) && x >= 1 && x == floor(x));
+    addParameter(parser, 'ModelName', 'AS2308_MIL_Baseline_v3', ...
+        @(x) (ischar(x) && ~isempty(x)) || ...
+        (isstring(x) && isscalar(x) && strlength(x) > 0));
     parse(parser, varargin{:});
     options = parser.Results;
 
     plateauDuration_s = double(options.PlateauDuration_s);
     repeatCount = double(options.RepeatCount);
+    modelName = char(string(options.ModelName));
     oracleEvaluationWindow_s = 0.05;
     if plateauDuration_s <= oracleEvaluationWindow_s
         error('run_repeated_reversal_test:PlateauTooShort', ...
@@ -41,7 +47,6 @@ function [segmentTable, testSummary, runData] = ...
     repositoryRoot = fileparts(runnerDirectory);
     modelDirectory = fullfile(repositoryRoot, 'model');
     oracleDirectory = fullfile(runnerDirectory, 'oracles');
-    modelName = 'AS2308_MIL_Baseline_v2';
     modelFile = fullfile(modelDirectory, [modelName, '.slx']);
     parameterScript = fullfile( ...
         modelDirectory, 'AS2308_calculate_pi_control_cc.m');

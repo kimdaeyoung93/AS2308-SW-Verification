@@ -4,12 +4,14 @@ function [scanTable, firstSaturationTable] = ...
 %
 %   [SCANTABLE, FIRSTSATURATIONTABLE] = CHARACTERIZE_VOLTAGE_SATURATION()
 %   sweeps positive and negative SpeedRef values from 15 to 19.75 rps in
-%   0.25 rps increments using AS2308_MIL_Baseline_v2.
+%   0.25 rps increments using AS2308_MIL_Baseline_v3 by default.
 %
 %   Name-value options:
 %     'Magnitudes_rps'  Positive sweep magnitudes below 20 rps
 %                       (default: 15:0.25:19.75)
 %     'StopTime_s'      Simulation stop time (default: 1)
+%     'ModelName'       Simulink model name
+%                       (default: AS2308_MIL_Baseline_v3)
 %
 %   raw_pi_output is used only as evidence that the PI output has exceeded
 %   the actuator limit and invoked saturation. REQ-VOLT-001 PASS/FAIL uses
@@ -26,18 +28,21 @@ function [scanTable, firstSaturationTable] = ...
     addParameter(parser, 'StopTime_s', 1, ...
         @(x) isnumeric(x) && isreal(x) && isscalar(x) && ...
         isfinite(x) && x > 0);
+    addParameter(parser, 'ModelName', 'AS2308_MIL_Baseline_v3', ...
+        @(x) (ischar(x) && ~isempty(x)) || ...
+        (isstring(x) && isscalar(x) && strlength(x) > 0));
     parse(parser, varargin{:});
     options = parser.Results;
 
     magnitudes_rps = unique(sort(double(options.Magnitudes_rps(:))));
     stopTime_s = double(options.StopTime_s);
+    modelName = char(string(options.ModelName));
     voltageLimit_v = 12;
 
     runnerDirectory = fileparts(mfilename('fullpath'));
     repositoryRoot = fileparts(runnerDirectory);
     modelDirectory = fullfile(repositoryRoot, 'model');
     oracleDirectory = fullfile(runnerDirectory, 'oracles');
-    modelName = 'AS2308_MIL_Baseline_v2';
     modelFile = fullfile(modelDirectory, [modelName, '.slx']);
     parameterScript = fullfile( ...
         modelDirectory, 'AS2308_calculate_pi_control_cc.m');

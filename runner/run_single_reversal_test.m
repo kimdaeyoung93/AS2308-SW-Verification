@@ -12,6 +12,8 @@ function [resultTable, runData] = run_single_reversal_test(varargin)
 %   Name-value options:
 %     'SwitchingTime_s'  Reference switching time (default: 2)
 %     'StopTime_s'       Simulation stop time (default: 4)
+%     'ModelName'        Simulink model name
+%                        (default: AS2308_MIL_Baseline_v3)
 %
 %   SwitchingTime_s and StopTime_s are test execution parameters used to
 %   provide initial and final plateaus. They are not product performance
@@ -21,11 +23,15 @@ function [resultTable, runData] = run_single_reversal_test(varargin)
     parser.FunctionName = mfilename;
     addParameter(parser, 'SwitchingTime_s', 2, @localPositiveScalar);
     addParameter(parser, 'StopTime_s', 4, @localPositiveScalar);
+    addParameter(parser, 'ModelName', 'AS2308_MIL_Baseline_v3', ...
+        @(x) (ischar(x) && ~isempty(x)) || ...
+        (isstring(x) && isscalar(x) && strlength(x) > 0));
     parse(parser, varargin{:});
     options = parser.Results;
 
     switchingTime_s = double(options.SwitchingTime_s);
     stopTime_s = double(options.StopTime_s);
+    modelName = char(string(options.ModelName));
     if switchingTime_s >= stopTime_s
         error('run_single_reversal_test:InvalidSwitchingTime', ...
             'SwitchingTime_s must be smaller than StopTime_s.');
@@ -35,7 +41,6 @@ function [resultTable, runData] = run_single_reversal_test(varargin)
     repositoryRoot = fileparts(runnerDirectory);
     modelDirectory = fullfile(repositoryRoot, 'model');
     oracleDirectory = fullfile(runnerDirectory, 'oracles');
-    modelName = 'AS2308_MIL_Baseline_v2';
     modelFile = fullfile(modelDirectory, [modelName, '.slx']);
     parameterScript = fullfile( ...
         modelDirectory, 'AS2308_calculate_pi_control_cc.m');
