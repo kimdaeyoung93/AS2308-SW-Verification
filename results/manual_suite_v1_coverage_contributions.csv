@@ -1,0 +1,10 @@
+TestCaseID,IterationID,TestInput,NewExecutionObjectives,CumulativeExecutionObjectives,NewDecisionObjectives,CumulativeDecisionObjectives,NewConditionObjectives,CumulativeConditionObjectives,NewMCDCObjectives,CumulativeMCDCObjectives
+MTC-001,IT-001,+16.75 rps,10,10,3,3,0,0,0,0
+MTC-001,IT-002,-16.75 rps,0,10,1,4,0,0,0,0
+MTC-002,IT-001,+2 rps,0,10,0,4,0,0,0,0
+MTC-002,IT-002,-2 rps,0,10,0,4,0,0,0,0
+MTC-003,IT-001,+15 rps,0,10,0,4,0,0,0,0
+MTC-003,IT-002,-15 rps,0,10,0,4,0,0,0,0
+MTC-004,IT-001,+15 to -15 rps,0,10,0,4,0,0,0,0
+MTC-004,IT-002,-15 to +15 rps,0,10,0,4,0,0,0,0
+MTC-005,IT-001,+15/-15 rps repeated,0,10,0,4,0,0,0,0

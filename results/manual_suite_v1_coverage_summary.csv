@@ -1,0 +1,5 @@
+Metric,CoveredObjectives,TotalObjectives,Percentage,Applicability
+Execution,10,10,100,Applicable
+Decision,4,4,100,Applicable
+Condition,0,0,NaN,N/A
+MCDC,0,0,NaN,N/A
