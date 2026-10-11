@@ -1,0 +1,10 @@
+TestCaseID,IterationID,RequirementID,TestObjective,TestInput,OracleUsed,Result,KeyMetric,KeyMetricValue,Notes
+MTC-001,IT-001,REQ-VOLT-001,Verify positive controller voltage limit,"+16.75 rps",evaluate_voltage_limit,PASS,max_vcmd_v,12,raw_pi_output > +12 V evidence: true; max raw PI 12.1001938713 V
+MTC-001,IT-002,REQ-VOLT-001,Verify negative controller voltage limit,"-16.75 rps",evaluate_voltage_limit,PASS,min_vcmd_v,-12,raw_pi_output < -12 V evidence: true; min raw PI -12.1001938713 V
+MTC-002,IT-001,REQ-TRK-001,Verify positive low-speed terminal tracking,"+2 rps",evaluate_tracking,PASS,max_abs_error_rps,1.11022302462516e-15,window 0.05 s; tolerance 1e-09 rps
+MTC-002,IT-002,REQ-TRK-001,Verify negative low-speed terminal tracking,"-2 rps",evaluate_tracking,PASS,max_abs_error_rps,1.11022302462516e-15,window 0.05 s; tolerance 1e-09 rps
+MTC-003,IT-001,REQ-DIR-001,Verify positive steady-state direction,"+15 rps",evaluate_direction,PASS,direction_mismatch_sample_count,0,direction-only Oracle; reference direction +1; motor direction +1
+MTC-003,IT-002,REQ-DIR-001,Verify negative steady-state direction,"-15 rps",evaluate_direction,PASS,direction_mismatch_sample_count,0,direction-only Oracle; reference direction -1; motor direction -1
+MTC-004,IT-001,REQ-REV-001,Verify positive-to-negative single reversal,"+15 to -15 rps",evaluate_direction + evaluate_tracking,PASS,tracking_max_abs_error_rps,1.06581410364015e-14,direction PASS; tracking PASS; mismatches 0
+MTC-004,IT-002,REQ-REV-001,Verify negative-to-positive single reversal,"-15 to +15 rps",evaluate_direction + evaluate_tracking,PASS,tracking_max_abs_error_rps,1.06581410364015e-14,direction PASS; tracking PASS; mismatches 0
+MTC-005,IT-001,REQ-REV-001,Verify repeated bidirectional reversal,"+15/-15 rps, 2 s plateau, 3 repeats",evaluate_direction + evaluate_tracking,PASS,passed_segment_count,6,6/6 segments passed; segment details saved separately

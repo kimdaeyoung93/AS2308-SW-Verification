@@ -1,0 +1,7 @@
+segment_id,commanded_reference_rps,direction_pass,tracking_pass,overall_pass,tracking_max_abs_error_rps,direction_mismatch_sample_count
+MTC-005-S01,15,1,1,1,1.06581410364015e-14,0
+MTC-005-S02,-15,1,1,1,1.06581410364015e-14,0
+MTC-005-S03,15,1,1,1,1.06581410364015e-14,0
+MTC-005-S04,-15,1,1,1,1.06581410364015e-14,0
+MTC-005-S05,15,1,1,1,1.06581410364015e-14,0
+MTC-005-S06,-15,1,1,1,1.06581410364015e-14,0
