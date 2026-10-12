@@ -9,6 +9,11 @@ function [summaryTable, segmentTable, runData] = run_ai_mil_suite(varargin)
 %   RUN_AI_MIL_SUITE('Execute', false) performs preflight checks only. It
 %   validates dependencies, candidate count, waveform durations, stored
 %   solver configuration, and output-directory creation without simulating.
+%   The optional MutationID parameter is reserved for applying one member of
+%   the frozen Primary Mutation Set through SimulationInput runtime overrides.
+%   WriteResults=false prevents a mutation run from replacing the healthy
+%   baseline result files. Default behavior remains an unmutated run that
+%   writes the normal AI MIL result files.
 %
 %   The 2.0 s plateau duration and 0.05 s terminal window are frozen test
 %   execution parameters, not product performance requirements. Existing
@@ -25,8 +30,15 @@ function [summaryTable, segmentTable, runData] = run_ai_mil_suite(varargin)
     parser.FunctionName = mfilename;
     addParameter(parser, 'Execute', true, ...
         @(x) islogical(x) && isscalar(x));
+    addParameter(parser, 'MutationID', "BASELINE", ...
+        @(x) (isstring(x) || ischar(x)) && isscalar(string(x)));
+    addParameter(parser, 'WriteResults', true, ...
+        @(x) islogical(x) && isscalar(x));
     parse(parser, varargin{:});
     executeSuite = parser.Results.Execute;
+    mutationID = upper(string(parser.Results.MutationID));
+    writeResults = parser.Results.WriteResults;
+    localValidateMutationID(mutationID);
 
     runnerDirectory = fileparts(mfilename('fullpath'));
     repositoryRoot = fileparts(runnerDirectory);
@@ -80,6 +92,7 @@ function [summaryTable, segmentTable, runData] = run_ai_mil_suite(varargin)
 
     fprintf('\nOfficial AI MIL Suite v1 preflight\n');
     fprintf('Model: %s\n', modelName);
+    fprintf('Runtime mutation: %s\n', mutationID);
     fprintf('Recognized candidates: %d\n', height(specification));
     fprintf('Segment duration: %.6g s; sample time: %.6g s\n', ...
         unique(specification.segment_duration_s), parameters.ts);
@@ -115,7 +128,7 @@ function [summaryTable, segmentTable, runData] = run_ai_mil_suite(varargin)
         try
             values = localParseValues(specRow.original_input_values, candidateId);
             [signals, samples] = localSimulateCandidate( ...
-                modelName, specRow, values, parameters, stimulus);
+                modelName, specRow, values, parameters, stimulus, mutationID);
             [summaryRow, newSegmentRows] = localEvaluateCandidate( ...
                 specRow, metadata, values, signals, parameters);
 
@@ -143,13 +156,19 @@ function [summaryTable, segmentTable, runData] = run_ai_mil_suite(varargin)
 
     summaryTable = struct2table(summaryRows);
     segmentTable = struct2table(segmentRows);
-    writetable(summaryTable, summaryFile);
-    writetable(segmentTable, segmentFile);
+    if writeResults
+        writetable(summaryTable, summaryFile);
+        writetable(segmentTable, segmentFile);
+    end
 
     fprintf('\nAI MIL Suite v1 results\n');
     disp(summaryTable);
-    fprintf('Summary CSV: %s\n', summaryFile);
-    fprintf('Segment CSV: %s\n\n', segmentFile);
+    if writeResults
+        fprintf('Summary CSV: %s\n', summaryFile);
+        fprintf('Segment CSV: %s\n\n', segmentFile);
+    else
+        fprintf('Result CSV writing: disabled\n\n');
+    end
 end
 
 function parameters = localProjectParameters()
@@ -269,7 +288,7 @@ function values = localParseValues(jsonText, candidateId)
 end
 
 function [signals, samples] = localSimulateCandidate( ...
-        modelName, specRow, values, parameters, stimulus)
+        modelName, specRow, values, parameters, stimulus, mutationID)
     simulationInput = Simulink.SimulationInput(modelName);
     variableNames = fieldnames(parameters);
     for variableIndex = 1:numel(variableNames)
@@ -278,6 +297,8 @@ function [signals, samples] = localSimulateCandidate( ...
             variableName, parameters.(variableName));
     end
     simulationInput = simulationInput.setVariable('SpeedRef_cmd', values(1));
+    simulationInput = localApplyFrozenMutation( ...
+        simulationInput, modelName, mutationID, parameters.Kis);
 
     if numel(values) == 1
         simulationInput = simulationInput.setBlockParameter( ...
@@ -378,6 +399,43 @@ function [signals, samples] = localSimulateCandidate( ...
         'VariableNames', { ...
         'time_s', 'reference_rps', 'motorspeed_rps', ...
         'Vcmd_v', 'raw_pi_output_v'});
+end
+
+function simulationInput = localApplyFrozenMutation( ...
+        simulationInput, modelName, mutationID, baselineKis)
+% Match the runtime-only injection used by run_manual_mutation_analysis.
+    switch mutationID
+        case "BASELINE"
+            return;
+        case "MUT-001"
+            simulationInput = simulationInput.setVariable('Kis', 0);
+        case "MUT-002"
+            simulationInput = simulationInput.setVariable( ...
+                'Kis', -abs(baselineKis));
+        case "MUT-003"
+            simulationInput = simulationInput.setBlockParameter( ...
+                [modelName, '/PI Speed Controller/Subtract'], ...
+                'Inputs', '++');
+        case "MUT-004"
+            simulationInput = simulationInput.setBlockParameter( ...
+                [modelName, '/PI Speed Controller/Saturation'], ...
+                'UpperLimit', '13');
+        case "MUT-005"
+            simulationInput = simulationInput.setBlockParameter( ...
+                [modelName, '/PI Speed Controller/Saturation'], ...
+                'LowerLimit', '-13');
+        case "MUT-006"
+            simulationInput = simulationInput.setBlockParameter( ...
+                [modelName, '/PI Speed Controller/Saturation'], ...
+                'UpperLimit', '0');
+    end
+end
+
+function localValidateMutationID(mutationID)
+    allowedIDs = ["BASELINE"; compose("MUT-%03d", (1:6).')];
+    assert(any(mutationID == allowedIDs), ...
+        'run_ai_mil_suite:UnknownMutation', ...
+        'MutationID must be BASELINE or one of MUT-001 through MUT-006.');
 end
 
 function localVerifyLoggedWaveform( ...
@@ -519,7 +577,15 @@ function [summaryRow, detailRows] = localEvaluateCandidate( ...
         detailRows(segmentIndex) = detail;
     end
 
-    assert(~isempty(requiredResults), ...
+    % A Tracking candidate can legitimately have no Oracle result when all
+    % of its plateaus fail the frozen applicability precondition. Preserve
+    % that protocol outcome as INCONCLUSIVE_PRECONDITION, not an execution
+    % error. Other requirements must still produce a required evaluation.
+    noApplicableTrackingPlateau = ...
+        specRow.requirement_id == "REQ-TRK-001" && ...
+        ~isempty(applicabilityResults) && ...
+        all(applicabilityResults == "PRECONDITION_NOT_MET");
+    assert(~isempty(requiredResults) || noApplicableTrackingPlateau, ...
         'run_ai_mil_suite:NoRequiredEvaluation', ...
         'No required Oracle evaluation was produced for %s.', specRow.candidate_id);
 
