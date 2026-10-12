@@ -207,6 +207,40 @@ def build_api_sources(
     }
 
 
+def create_structured_interaction(
+    client: Any,
+    model: str,
+    input_text: str,
+    response_schema: dict[str, Any],
+    system_instruction: str | None = None,
+    max_output_tokens: int | None = None,
+    timeout_s: float | None = None,
+) -> Any:
+    """Create one non-streaming Interactions API request with JSON output."""
+
+    generation_config: dict[str, Any] = {"thinking_level": THINKING_LEVEL}
+    if max_output_tokens is not None:
+        generation_config["max_output_tokens"] = max_output_tokens
+
+    request: dict[str, Any] = {
+        "model": model,
+        "input": input_text,
+        "generation_config": generation_config,
+        "response_format": {
+            "type": "text",
+            "mime_type": "application/json",
+            "schema": response_schema,
+        },
+        "response_mime_type": "application/json",
+        "store": False,
+    }
+    if system_instruction is not None:
+        request["system_instruction"] = system_instruction
+    if timeout_s is not None:
+        request["timeout"] = timeout_s
+    return client.interactions.create(**request)
+
+
 def find_leakage(source_texts: dict[str, str]) -> list[tuple[str, str]]:
     """Find specific Manual/Mutation/Coverage-result leakage markers."""
 
@@ -317,6 +351,7 @@ def _dry_run_report(
 
     print("AI-Assisted Test Case Generator V1 - DRY RUN")
     print("provider: Google Gemini")
+    print("api_type: Gemini Interactions API")
     print(f"selected_model: {model}")
     print(f"thinking_level: {THINKING_LEVEL}")
     print(f"candidate_budget: {CANDIDATE_BUDGET}")
@@ -352,10 +387,21 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Generate AI-assisted requirements-based MIL candidates."
     )
-    parser.add_argument(
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
         "--dry-run",
         action="store_true",
         help="Inspect the request and leakage checks without calling the API.",
+    )
+    mode_group.add_argument(
+        "--smoke-test",
+        action="store_true",
+        help="Call the API with a minimal schema; no candidate files are written.",
+    )
+    mode_group.add_argument(
+        "--dump-api-schema",
+        action="store_true",
+        help="Print only the Gemini-compatible schema sent to the API.",
     )
     arguments = parser.parse_args()
 
@@ -378,6 +424,10 @@ def main() -> int:
     )
     selected_model = os.environ.get("GEMINI_MODEL", "").strip() or DEFAULT_MODEL
 
+    if arguments.dump_api_schema:
+        print(json.dumps(output_schema, indent=2, ensure_ascii=False))
+        return 0
+
     if arguments.dry_run:
         passed = _dry_run_report(
             selected_model,
@@ -391,6 +441,75 @@ def main() -> int:
             api_schema_keywords,
         )
         return 0 if passed else 1
+
+    if arguments.smoke_test:
+        if not os.environ.get("GEMINI_API_KEY", "").strip():
+            print(
+                "GEMINI_API_KEY is not set; the smoke test was not called.",
+                file=sys.stderr,
+            )
+            return 1
+
+        try:
+            from google import genai
+        except ImportError:
+            print(
+                "The google-genai Python package is not installed; "
+                "the smoke test was not called.",
+                file=sys.stderr,
+            )
+            return 1
+
+        smoke_schema = {
+            "type": "object",
+            "properties": {"status": {"type": "string"}},
+            "required": ["status"],
+            "additionalProperties": False,
+        }
+        try:
+            with genai.Client() as client:
+                interaction = create_structured_interaction(
+                    client,
+                    selected_model,
+                    "Return status as API_OK",
+                    smoke_schema,
+                )
+        except Exception as error:
+            print(f"Interactions API smoke test failed: {error}", file=sys.stderr)
+            return 1
+
+        if getattr(interaction, "status", None) != "completed":
+            print(
+                "Interactions API smoke test did not complete successfully: "
+                f"{getattr(interaction, 'status', None)}",
+                file=sys.stderr,
+            )
+            return 1
+        output_text = getattr(interaction, "output_text", None)
+        if not isinstance(output_text, str) or not output_text.strip():
+            print(
+                "Interactions API smoke test returned no output_text.",
+                file=sys.stderr,
+            )
+            return 1
+        try:
+            smoke_payload = json.loads(output_text)
+        except json.JSONDecodeError as error:
+            print(f"Smoke test output is not valid JSON: {error}", file=sys.stderr)
+            return 1
+        if smoke_payload != {"status": "API_OK"}:
+            print(
+                f"Unexpected smoke test output: {smoke_payload}",
+                file=sys.stderr,
+            )
+            return 1
+
+        print("Interactions API Structured Output smoke test: PASS")
+        print(f"model: {selected_model}")
+        print(f"thinking_level: {THINKING_LEVEL}")
+        print(f"output_text: {output_text}")
+        print("official_generation_performed: false")
+        return 0
 
     findings = find_leakage(source_texts)
     if findings:
@@ -406,7 +525,6 @@ def main() -> int:
 
     try:
         from google import genai
-        from google.genai import types
     except ImportError:
         print(
             "The google-genai Python package is not installed; no API call was made.",
@@ -415,25 +533,32 @@ def main() -> int:
         return 1
 
     try:
-        client = genai.Client()
-        response = client.models.generate_content(
-            model=selected_model,
-            contents=test_basis_text,
-            config=types.GenerateContentConfig(
+        with genai.Client() as client:
+            interaction = create_structured_interaction(
+                client,
+                selected_model,
+                test_basis_text,
+                output_schema,
                 system_instruction=prompt_text,
-                response_mime_type="application/json",
-                response_json_schema=output_schema,
-                thinking_config=types.ThinkingConfig(
-                    thinking_level=THINKING_LEVEL
-                ),
-            ),
-        )
+            )
     except Exception as error:  # SDK/network/API errors must not touch outputs.
-        print(f"Gemini generate_content call failed: {error}", file=sys.stderr)
+        print(f"Gemini Interactions API call failed: {error}", file=sys.stderr)
+        return 1
+
+    if getattr(interaction, "status", None) != "completed":
+        print(
+            "Interaction did not complete successfully: "
+            f"{getattr(interaction, 'status', None)}",
+            file=sys.stderr,
+        )
+        return 1
+    output_text = getattr(interaction, "output_text", None)
+    if not isinstance(output_text, str) or not output_text.strip():
+        print("Interaction returned no output_text.", file=sys.stderr)
         return 1
 
     try:
-        parsed_payload = _strict_parse_candidates(response.text)
+        parsed_payload = _strict_parse_candidates(output_text)
     except (TypeError, ValueError) as error:
         print(f"Structured response validation failed: {error}", file=sys.stderr)
         return 1
@@ -447,7 +572,8 @@ def main() -> int:
         "generation_timestamp": datetime.now(timezone.utc).isoformat(),
         "test_basis_file": str(test_basis_path.relative_to(ai_directory.parent)),
         "prompt_file": str(prompt_path.relative_to(ai_directory.parent)),
-        "api_type": "Gemini generate_content",
+        "api_type": "Gemini Interactions API",
+        "interaction_id": getattr(interaction, "id", None),
         "generation_status": "SUCCESS",
     }
 
