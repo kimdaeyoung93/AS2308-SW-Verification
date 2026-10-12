@@ -1,0 +1,366 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "TC-DIR-001",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify that a positive speed reference produces positive steady-state motor speed.",
+      "precondition": "DUT is initialized at rest and no prior reference is applied.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        5.0
+      ],
+      "expected_behavior": "With SpeedRef held at +5 rps, the steady-state MotorSpeed is positive.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Represents the positive non-zero reference partition for bidirectional operation.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-DIR-002",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify that a negative speed reference produces negative steady-state motor speed.",
+      "precondition": "DUT is initialized at rest and no prior reference is applied.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -5.0
+      ],
+      "expected_behavior": "With SpeedRef held at -5 rps, the steady-state MotorSpeed is negative.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Represents the negative non-zero reference partition for bidirectional operation.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-DIR-003",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify positive-direction operation at a low positive reference.",
+      "precondition": "DUT is initialized at rest and no prior reference is applied.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        0.1
+      ],
+      "expected_behavior": "With SpeedRef held at +0.1 rps, the steady-state MotorSpeed is positive.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises the positive-reference side close to the zero-direction boundary without using zero.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-DIR-004",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify negative-direction operation at a low negative reference.",
+      "precondition": "DUT is initialized at rest and no prior reference is applied.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -0.1
+      ],
+      "expected_behavior": "With SpeedRef held at -0.1 rps, the steady-state MotorSpeed is negative.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises the negative-reference side close to the zero-direction boundary without using zero.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-DIR-005",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify positive-direction operation at a high nominal reference magnitude.",
+      "precondition": "DUT is initialized at rest and no prior reference is applied.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        19.9
+      ],
+      "expected_behavior": "With SpeedRef held at +19.9 rps, the steady-state MotorSpeed is positive.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises the upper side of the stated nominal SpeedRef domain while retaining a positive reference.",
+      "test_scope": "stress"
+    },
+    {
+      "candidate_id": "TC-DIR-006",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify negative-direction operation at a high nominal reference magnitude.",
+      "precondition": "DUT is initialized at rest and no prior reference is applied.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -19.9
+      ],
+      "expected_behavior": "With SpeedRef held at -19.9 rps, the steady-state MotorSpeed is negative.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises the lower side of the stated nominal SpeedRef domain while retaining a negative reference.",
+      "test_scope": "stress"
+    },
+    {
+      "candidate_id": "TC-REV-001",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify reversal from positive steady operation to negative operation.",
+      "precondition": "DUT is initialized at rest; hold each sequence value long enough to establish the specified operating phase before advancing.",
+      "input_type": "Positive-to-negative reference sequence",
+      "input_values": [
+        5.0,
+        -5.0
+      ],
+      "expected_behavior": "MotorSpeed initially operates in the positive direction, transitions after the sign reversal, and converges stably to the negative reference direction.",
+      "test_design_technique": "State Transition",
+      "rationale": "Directly exercises the required positive-to-negative reversal sequence.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-REV-002",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify reversal from negative steady operation to positive operation.",
+      "precondition": "DUT is initialized at rest; hold each sequence value long enough to establish the specified operating phase before advancing.",
+      "input_type": "Negative-to-positive reference sequence",
+      "input_values": [
+        -5.0,
+        5.0
+      ],
+      "expected_behavior": "MotorSpeed initially operates in the negative direction, transitions after the sign reversal, and converges stably to the positive reference direction.",
+      "test_design_technique": "State Transition",
+      "rationale": "Directly exercises the required negative-to-positive reversal sequence.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-REV-003",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify a low-magnitude positive-to-negative reversal.",
+      "precondition": "DUT is initialized at rest; hold each sequence value long enough to establish the specified operating phase before advancing.",
+      "input_type": "Positive-to-negative reference sequence",
+      "input_values": [
+        0.5,
+        -0.5
+      ],
+      "expected_behavior": "MotorSpeed transitions from positive operation to negative operation and converges stably to the final negative reference direction.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises reversal near the zero-reference boundary while using non-zero references.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-REV-004",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify a low-magnitude negative-to-positive reversal.",
+      "precondition": "DUT is initialized at rest; hold each sequence value long enough to establish the specified operating phase before advancing.",
+      "input_type": "Negative-to-positive reference sequence",
+      "input_values": [
+        -0.5,
+        0.5
+      ],
+      "expected_behavior": "MotorSpeed transitions from negative operation to positive operation and converges stably to the final positive reference direction.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises reversal near the zero-reference boundary in the opposite direction.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-REV-005",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify a high-magnitude positive-to-negative reversal within the nominal reference domain.",
+      "precondition": "DUT is initialized at rest; hold each sequence value long enough to establish the specified operating phase before advancing.",
+      "input_type": "Positive-to-negative reference sequence",
+      "input_values": [
+        19.9,
+        -19.9
+      ],
+      "expected_behavior": "MotorSpeed transitions from positive operation to negative operation and converges stably to the final negative reference direction.",
+      "test_design_technique": "Scenario-Based",
+      "rationale": "Exercises both reversal directions at high nominal reference magnitude.",
+      "test_scope": "stress"
+    },
+    {
+      "candidate_id": "TC-REV-006",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify repeated bidirectional reversals.",
+      "precondition": "DUT is initialized at rest; hold each sequence value long enough to establish the specified operating phase before advancing.",
+      "input_type": "Repeated reversal sequence",
+      "input_values": [
+        4.0,
+        -4.0,
+        4.0
+      ],
+      "expected_behavior": "MotorSpeed transitions through the commanded directions and converges stably to the final positive reference direction.",
+      "test_design_technique": "Scenario-Based",
+      "rationale": "Exercises more than one sign transition and verifies the final direction after repeated reversals.",
+      "test_scope": "stress"
+    },
+    {
+      "candidate_id": "TC-TRK-001",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify stable tracking of a moderate positive constant reference.",
+      "precondition": "DUT is initialized at rest and the reference is maintained constantly.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        5.0
+      ],
+      "expected_behavior": "MotorSpeed converges stably to the maintained +5 rps reference without persistent actuator saturation.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Represents nominal positive constant tracking under the stated non-saturation condition.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-TRK-002",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify stable tracking of a moderate negative constant reference.",
+      "precondition": "DUT is initialized at rest and the reference is maintained constantly.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -5.0
+      ],
+      "expected_behavior": "MotorSpeed converges stably to the maintained -5 rps reference without persistent actuator saturation.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Represents nominal negative constant tracking under the stated non-saturation condition.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-TRK-003",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify tracking at a low positive reference.",
+      "precondition": "DUT is initialized at rest and the reference is maintained constantly.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        0.1
+      ],
+      "expected_behavior": "MotorSpeed converges stably to the maintained +0.1 rps reference without persistent actuator saturation.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises tracking close to the zero-reference boundary.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-TRK-004",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify tracking at a low negative reference.",
+      "precondition": "DUT is initialized at rest and the reference is maintained constantly.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -0.1
+      ],
+      "expected_behavior": "MotorSpeed converges stably to the maintained -0.1 rps reference without persistent actuator saturation.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises tracking close to the zero-reference boundary in the negative direction.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-TRK-005",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify tracking at a high positive nominal reference.",
+      "precondition": "DUT is initialized at rest and the reference is maintained constantly.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        19.9
+      ],
+      "expected_behavior": "MotorSpeed converges stably to the maintained +19.9 rps reference without persistent actuator saturation.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises the upper edge of the stated nominal SpeedRef domain for constant tracking.",
+      "test_scope": "stress"
+    },
+    {
+      "candidate_id": "TC-TRK-006",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify tracking at a high negative nominal reference.",
+      "precondition": "DUT is initialized at rest and the reference is maintained constantly.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -19.9
+      ],
+      "expected_behavior": "MotorSpeed converges stably to the maintained -19.9 rps reference without persistent actuator saturation.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises the lower edge of the stated nominal SpeedRef domain for constant tracking.",
+      "test_scope": "stress"
+    },
+    {
+      "candidate_id": "TC-TRK-007",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify stable tracking after a change between two constant references.",
+      "precondition": "DUT is initialized at rest; hold each reference value long enough to establish the corresponding operating phase before advancing.",
+      "input_type": "Sequential constant references",
+      "input_values": [
+        2.0,
+        10.0
+      ],
+      "expected_behavior": "MotorSpeed converges stably to the maintained reference in each phase without persistent actuator saturation, including the final +10 rps phase.",
+      "test_design_technique": "Scenario-Based",
+      "rationale": "Checks constant-reference tracking across successive operating points rather than only from rest.",
+      "test_scope": "stress"
+    },
+    {
+      "candidate_id": "TC-VOLT-001",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify voltage limitation during a moderate positive command.",
+      "precondition": "DUT is initialized at rest and the positive reference is maintained for the complete simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        5.0
+      ],
+      "expected_behavior": "The maximum and minimum Vcmd observed over the complete simulation interval remain within -12 V to +12 V.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Represents a nominal positive operating case for complete-interval voltage observation.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-VOLT-002",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify voltage limitation during a moderate negative command.",
+      "precondition": "DUT is initialized at rest and the negative reference is maintained for the complete simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -5.0
+      ],
+      "expected_behavior": "The maximum and minimum Vcmd observed over the complete simulation interval remain within -12 V to +12 V.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Represents a nominal negative operating case for complete-interval voltage observation.",
+      "test_scope": "nominal"
+    },
+    {
+      "candidate_id": "TC-VOLT-003",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify voltage limitation near the positive nominal reference boundary.",
+      "precondition": "DUT is initialized at rest and the reference is maintained for the complete simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        19.9
+      ],
+      "expected_behavior": "The maximum and minimum Vcmd observed over the complete simulation interval remain within -12 V to +12 V.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises voltage limitation at a high positive nominal reference.",
+      "test_scope": "stress"
+    },
+    {
+      "candidate_id": "TC-VOLT-004",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify voltage limitation near the negative nominal reference boundary.",
+      "precondition": "DUT is initialized at rest and the reference is maintained for the complete simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -19.9
+      ],
+      "expected_behavior": "The maximum and minimum Vcmd observed over the complete simulation interval remain within -12 V to +12 V.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises voltage limitation at a high negative nominal reference.",
+      "test_scope": "stress"
+    },
+    {
+      "candidate_id": "TC-VOLT-005",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify voltage limitation through a positive-to-negative reversal.",
+      "precondition": "DUT is initialized at rest; hold each sequence value long enough to exercise the corresponding operating phase.",
+      "input_type": "Positive-to-negative reference sequence",
+      "input_values": [
+        19.9,
+        -19.9
+      ],
+      "expected_behavior": "The maximum and minimum Vcmd observed over the complete simulation interval remain within -12 V to +12 V throughout the reversal sequence.",
+      "test_design_technique": "State Transition",
+      "rationale": "Observes the voltage constraint across a high-magnitude direction transition.",
+      "test_scope": "stress"
+    },
+    {
+      "candidate_id": "TC-VOLT-006",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify voltage limitation through repeated direction changes.",
+      "precondition": "DUT is initialized at rest; hold each sequence value long enough to exercise the corresponding operating phase.",
+      "input_type": "Repeated reversal sequence",
+      "input_values": [
+        10.0,
+        -10.0,
+        10.0,
+        -10.0
+      ],
+      "expected_behavior": "The maximum and minimum Vcmd observed over the complete simulation interval remain within -12 V to +12 V throughout all commanded direction changes.",
+      "test_design_technique": "Scenario-Based",
+      "rationale": "Checks complete-interval voltage limitation during repeated bidirectional operation.",
+      "test_scope": "stress"
+    }
+  ]
+}

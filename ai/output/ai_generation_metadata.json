@@ -1,0 +1,18 @@
+{
+  "provider": "OpenAI",
+  "model": "gpt-5.6-luna",
+  "reasoning_effort": "medium",
+  "api_type": "Responses API",
+  "candidate_count_requested": 25,
+  "candidate_count_returned": 25,
+  "semantic_valid_count": 25,
+  "semantic_rejected_count": 0,
+  "response_id": "resp_0f4e46d4bf81ec02016acc8a72a58087d09d84a16fce04b160",
+  "usage_input_tokens": 1020,
+  "usage_output_tokens": 3572,
+  "usage_reasoning_tokens": 426,
+  "generation_timestamp": "2026-10-12T07:21:55.691727+00:00",
+  "test_basis_file": "ai\\01_AI_Test_Basis.md",
+  "prompt_file": "ai\\prompt\\tc_generation_prompt.txt",
+  "generation_status": "SUCCESS"
+}
