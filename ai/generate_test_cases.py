@@ -7,7 +7,7 @@ Official generation:
     python ai/generate_test_cases.py
 
 Only the AI Test Basis, generation prompt, and schema defined from
-tc_schema.py are sent to the OpenAI Responses API. Generation does not run
+tc_schema.py are sent to the Google Gemini API. Generation does not run
 the downstream candidate validator and does not use any test-result data.
 """
 
@@ -31,8 +31,8 @@ from tc_schema import (
 )
 
 
-DEFAULT_MODEL = "gpt-5.6-sol"
-REASONING_EFFORT = "medium"
+DEFAULT_MODEL = "gemini-2.5-flash"
+THINKING_BUDGET = 1024
 CANDIDATE_BUDGET = 25
 
 LEAKAGE_MARKERS = (
@@ -47,7 +47,7 @@ LEAKAGE_MARKERS = (
 
 
 def build_candidate_schema() -> dict[str, Any]:
-    """Build the strict Responses API schema from the local TC schema."""
+    """Build the structured-output schema from the local TC schema."""
 
     candidate_properties: dict[str, Any] = {
         "candidate_id": {"type": "string", "minLength": 1},
@@ -212,22 +212,20 @@ def _dry_run_report(
     test_basis_text: str,
     source_texts: dict[str, str],
 ) -> bool:
-    final_input = [
-        {"role": "system", "content": prompt_text},
-        {"role": "user", "content": test_basis_text},
-    ]
-    final_input_text = json.dumps(final_input, ensure_ascii=False)
-    api_key_present = bool(os.environ.get("OPENAI_API_KEY", "").strip())
+    # The request consists only of the prompt, Test Basis, and response schema.
+    final_input_text = json.dumps(source_texts, ensure_ascii=False, sort_keys=True)
+    api_key_present = bool(os.environ.get("GEMINI_API_KEY", "").strip())
     findings = find_leakage(source_texts)
 
     print("AI-Assisted Test Case Generator V1 - DRY RUN")
+    print("provider: Google Gemini")
     print(f"selected_model: {model}")
-    print(f"reasoning_effort: {REASONING_EFFORT}")
+    print(f"thinking_budget: {THINKING_BUDGET}")
     print(f"candidate_budget: {CANDIDATE_BUDGET}")
     print(f"test_basis_path: {test_basis_path}")
     print(f"prompt_path: {prompt_path}")
     print(f"final_api_input_character_count: {len(final_input_text)}")
-    print(f"api_key_present: {str(api_key_present).lower()}")
+    print(f"gemini_api_key_present: {str(api_key_present).lower()}")
     print("api_source_types:")
     for source_name in source_texts:
         print(f"  - {source_name}")
@@ -266,9 +264,7 @@ def main() -> int:
     source_texts = build_api_sources(
         test_basis_text, prompt_text, output_schema
     )
-    selected_model = (
-        os.environ.get("OPENAI_MODEL", "").strip() or DEFAULT_MODEL
-    )
+    selected_model = os.environ.get("GEMINI_MODEL", "").strip() or DEFAULT_MODEL
 
     if arguments.dry_run:
         passed = _dry_run_report(
@@ -289,63 +285,54 @@ def main() -> int:
         print(f"Generation blocked by leakage sanity check: {details}", file=sys.stderr)
         return 1
 
-    if not os.environ.get("OPENAI_API_KEY", "").strip():
-        print("OPENAI_API_KEY is not set; no API call was made.", file=sys.stderr)
+    if not os.environ.get("GEMINI_API_KEY", "").strip():
+        print("GEMINI_API_KEY is not set; no API call was made.", file=sys.stderr)
         return 1
 
     try:
-        from openai import OpenAI
+        from google import genai
+        from google.genai import types
     except ImportError:
         print(
-            "The openai Python package is not installed; no API call was made.",
+            "The google-genai Python package is not installed; no API call was made.",
             file=sys.stderr,
         )
         return 1
 
     try:
-        client = OpenAI()
-        response = client.responses.create(
+        client = genai.Client()
+        response = client.models.generate_content(
             model=selected_model,
-            reasoning={"effort": REASONING_EFFORT},
-            instructions=prompt_text,
-            input=[{"role": "user", "content": test_basis_text}],
-            text={
-                "format": {
-                    "type": "json_schema",
-                    "name": "as2308_mil_test_candidates",
-                    "strict": True,
-                    "schema": output_schema,
-                }
-            },
-            store=False,
+            contents=test_basis_text,
+            config=types.GenerateContentConfig(
+                system_instruction=prompt_text,
+                response_mime_type="application/json",
+                response_schema=output_schema,
+                thinking_config=types.ThinkingConfig(
+                    thinking_budget=THINKING_BUDGET
+                ),
+            ),
         )
     except Exception as error:  # SDK/network/API errors must not touch outputs.
-        print(f"OpenAI Responses API call failed: {error}", file=sys.stderr)
-        return 1
-
-    if getattr(response, "status", None) != "completed":
-        print(
-            f"Response did not complete successfully: {response.status}",
-            file=sys.stderr,
-        )
+        print(f"Gemini generate_content call failed: {error}", file=sys.stderr)
         return 1
 
     try:
-        parsed_payload = _strict_parse_candidates(response.output_text)
+        parsed_payload = _strict_parse_candidates(response.text)
     except (TypeError, ValueError) as error:
         print(f"Structured response validation failed: {error}", file=sys.stderr)
         return 1
 
     metadata = {
+        "provider": "Google Gemini",
         "model": selected_model,
-        "reasoning_effort": REASONING_EFFORT,
+        "thinking_budget": THINKING_BUDGET,
         "candidate_count_requested": CANDIDATE_BUDGET,
         "candidate_count_returned": len(parsed_payload["candidates"]),
         "generation_timestamp": datetime.now(timezone.utc).isoformat(),
         "test_basis_file": str(test_basis_path.relative_to(ai_directory.parent)),
         "prompt_file": str(prompt_path.relative_to(ai_directory.parent)),
-        "api_type": "OpenAI Responses API",
-        "response_id": getattr(response, "id", None),
+        "api_type": "Gemini generate_content",
         "generation_status": "SUCCESS",
     }
 
