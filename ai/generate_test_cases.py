@@ -14,6 +14,7 @@ the downstream candidate validator and does not use any test-result data.
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import math
 import os
@@ -34,6 +35,32 @@ from tc_schema import (
 DEFAULT_MODEL = "gemini-3.8-flash"
 THINKING_LEVEL = "medium"
 CANDIDATE_BUDGET = 25
+
+GEMINI_RESPONSE_JSON_SCHEMA_KEYWORDS = frozenset(
+    {
+        "$id",
+        "$defs",
+        "$ref",
+        "$anchor",
+        "type",
+        "format",
+        "title",
+        "description",
+        "enum",
+        "items",
+        "prefixItems",
+        "minItems",
+        "maxItems",
+        "minimum",
+        "maximum",
+        "anyOf",
+        "oneOf",
+        "properties",
+        "additionalProperties",
+        "required",
+        "propertyOrdering",
+    }
+)
 
 LEAKAGE_MARKERS = (
     "MUT-",
@@ -96,6 +123,74 @@ def build_candidate_schema() -> dict[str, Any]:
         },
         "required": ["candidates"],
     }
+
+
+def collect_schema_keywords(schema: dict[str, Any]) -> set[str]:
+    """Collect JSON Schema keywords without treating property names as keywords."""
+
+    keywords: set[str] = set()
+
+    def visit(schema_node: dict[str, Any]) -> None:
+        for keyword, value in schema_node.items():
+            keywords.add(keyword)
+            if keyword in {"properties", "$defs"} and isinstance(value, dict):
+                for child_schema in value.values():
+                    if isinstance(child_schema, dict):
+                        visit(child_schema)
+            elif keyword in {"items", "additionalProperties"} and isinstance(
+                value, dict
+            ):
+                visit(value)
+            elif keyword in {"prefixItems", "anyOf", "oneOf"} and isinstance(
+                value, list
+            ):
+                for child_schema in value:
+                    if isinstance(child_schema, dict):
+                        visit(child_schema)
+
+    visit(schema)
+    return keywords
+
+
+def build_gemini_compatible_schema(
+    canonical_schema: dict[str, Any],
+) -> tuple[dict[str, Any], set[str]]:
+    """Copy a schema while removing only Gemini-unsupported keywords."""
+
+    removed_keywords: set[str] = set()
+
+    def copy_schema_node(schema_node: dict[str, Any]) -> dict[str, Any]:
+        compatible_node: dict[str, Any] = {}
+        for keyword, value in schema_node.items():
+            if keyword not in GEMINI_RESPONSE_JSON_SCHEMA_KEYWORDS:
+                removed_keywords.add(keyword)
+                continue
+
+            if keyword in {"properties", "$defs"} and isinstance(value, dict):
+                compatible_node[keyword] = {
+                    property_name: copy_schema_node(child_schema)
+                    if isinstance(child_schema, dict)
+                    else copy.deepcopy(child_schema)
+                    for property_name, child_schema in value.items()
+                }
+            elif keyword in {"items", "additionalProperties"} and isinstance(
+                value, dict
+            ):
+                compatible_node[keyword] = copy_schema_node(value)
+            elif keyword in {"prefixItems", "anyOf", "oneOf"} and isinstance(
+                value, list
+            ):
+                compatible_node[keyword] = [
+                    copy_schema_node(child_schema)
+                    if isinstance(child_schema, dict)
+                    else copy.deepcopy(child_schema)
+                    for child_schema in value
+                ]
+            else:
+                compatible_node[keyword] = copy.deepcopy(value)
+        return compatible_node
+
+    return copy_schema_node(canonical_schema), removed_keywords
 
 
 def build_api_sources(
@@ -211,6 +306,9 @@ def _dry_run_report(
     prompt_text: str,
     test_basis_text: str,
     source_texts: dict[str, str],
+    canonical_schema_keywords: set[str],
+    removed_schema_keywords: set[str],
+    api_schema_keywords: set[str],
 ) -> bool:
     # The request consists only of the prompt, Test Basis, and response schema.
     final_input_text = json.dumps(source_texts, ensure_ascii=False, sort_keys=True)
@@ -226,6 +324,15 @@ def _dry_run_report(
     print(f"prompt_path: {prompt_path}")
     print(f"final_api_input_character_count: {len(final_input_text)}")
     print(f"gemini_api_key_present: {str(api_key_present).lower()}")
+    print(
+        "canonical_schema_keywords: "
+        + ", ".join(sorted(canonical_schema_keywords))
+    )
+    print(
+        "removed_unsupported_schema_keywords: "
+        + (", ".join(sorted(removed_schema_keywords)) or "(none)")
+    )
+    print("api_schema_keywords: " + ", ".join(sorted(api_schema_keywords)))
     print("api_source_types:")
     for source_name in source_texts:
         print(f"  - {source_name}")
@@ -260,7 +367,12 @@ def main() -> int:
 
     test_basis_text = test_basis_path.read_text(encoding="utf-8")
     prompt_text = prompt_path.read_text(encoding="utf-8")
-    output_schema = build_candidate_schema()
+    canonical_output_schema = build_candidate_schema()
+    output_schema, removed_schema_keywords = build_gemini_compatible_schema(
+        canonical_output_schema
+    )
+    canonical_schema_keywords = collect_schema_keywords(canonical_output_schema)
+    api_schema_keywords = collect_schema_keywords(output_schema)
     source_texts = build_api_sources(
         test_basis_text, prompt_text, output_schema
     )
@@ -274,6 +386,9 @@ def main() -> int:
             prompt_text,
             test_basis_text,
             source_texts,
+            canonical_schema_keywords,
+            removed_schema_keywords,
+            api_schema_keywords,
         )
         return 0 if passed else 1
 
