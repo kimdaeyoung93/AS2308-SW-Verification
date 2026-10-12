@@ -31,8 +31,8 @@ from tc_schema import (
 )
 
 
-DEFAULT_MODEL = "gemini-2.5-flash"
-THINKING_BUDGET = 1024
+DEFAULT_MODEL = "gemini-3.8-flash"
+THINKING_LEVEL = "medium"
 CANDIDATE_BUDGET = 25
 
 LEAKAGE_MARKERS = (
@@ -220,7 +220,7 @@ def _dry_run_report(
     print("AI-Assisted Test Case Generator V1 - DRY RUN")
     print("provider: Google Gemini")
     print(f"selected_model: {model}")
-    print(f"thinking_budget: {THINKING_BUDGET}")
+    print(f"thinking_level: {THINKING_LEVEL}")
     print(f"candidate_budget: {CANDIDATE_BUDGET}")
     print(f"test_basis_path: {test_basis_path}")
     print(f"prompt_path: {prompt_path}")
@@ -309,7 +309,7 @@ def main() -> int:
                 response_mime_type="application/json",
                 response_json_schema=output_schema,
                 thinking_config=types.ThinkingConfig(
-                    thinking_budget=THINKING_BUDGET
+                    thinking_level=THINKING_LEVEL
                 ),
             ),
         )
@@ -326,7 +326,7 @@ def main() -> int:
     metadata = {
         "provider": "Google Gemini",
         "model": selected_model,
-        "thinking_budget": THINKING_BUDGET,
+        "thinking_level": THINKING_LEVEL,
         "candidate_count_requested": CANDIDATE_BUDGET,
         "candidate_count_returned": len(parsed_payload["candidates"]),
         "generation_timestamp": datetime.now(timezone.utc).isoformat(),
