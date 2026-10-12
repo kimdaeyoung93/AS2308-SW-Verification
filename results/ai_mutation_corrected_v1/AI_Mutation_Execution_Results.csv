@@ -1,0 +1,55 @@
+mutation_id,mutation_name,candidate_id,selection_order,requirement_id,baseline_result,mutant_result,killed_by_execution,kill_reason,applicability,failure_reason,protocol_version
+MUT-001,Integral_Path_Disabled,TC-DIR-001,1,REQ-DIR-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-001,Integral_Path_Disabled,TC-DIR-002,2,REQ-DIR-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-001,Integral_Path_Disabled,TC-REV-001,3,REQ-REV-001,PASS,INCONCLUSIVE_PRECONDITION,0,InconclusivePrecondition,PRECONDITION_NOT_MET,"A previous plateau did not establish the reversal precondition.",v1.0
+MUT-001,Integral_Path_Disabled,TC-REV-003,4,REQ-REV-001,PASS,INCONCLUSIVE_PRECONDITION,0,InconclusivePrecondition,PRECONDITION_NOT_MET,"A previous plateau did not establish the reversal precondition.",v1.0
+MUT-001,Integral_Path_Disabled,TC-TRK-003,5,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-001,Integral_Path_Disabled,TC-TRK-005,6,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-001,Integral_Path_Disabled,TC-TRK-007,7,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-001,Integral_Path_Disabled,TC-VOLT-004,8,REQ-VOLT-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-001,Integral_Path_Disabled,TC-VOLT-006,9,REQ-VOLT-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-002,Integral_Gain_Sign_Inverted,TC-DIR-001,1,REQ-DIR-001,PASS,FAIL,1,OracleFailure,NOT_REQUIRED,"At least one required Oracle evaluation failed.",v1.0
+MUT-002,Integral_Gain_Sign_Inverted,TC-DIR-002,2,REQ-DIR-001,PASS,FAIL,1,OracleFailure,NOT_REQUIRED,"At least one required Oracle evaluation failed.",v1.0
+MUT-002,Integral_Gain_Sign_Inverted,TC-REV-001,3,REQ-REV-001,PASS,INCONCLUSIVE_PRECONDITION,0,InconclusivePrecondition,PRECONDITION_NOT_MET,"A previous plateau did not establish the reversal precondition.",v1.0
+MUT-002,Integral_Gain_Sign_Inverted,TC-REV-003,4,REQ-REV-001,PASS,INCONCLUSIVE_PRECONDITION,0,InconclusivePrecondition,PRECONDITION_NOT_MET,"A previous plateau did not establish the reversal precondition.",v1.0
+MUT-002,Integral_Gain_Sign_Inverted,TC-TRK-003,5,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-002,Integral_Gain_Sign_Inverted,TC-TRK-005,6,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-002,Integral_Gain_Sign_Inverted,TC-TRK-007,7,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-002,Integral_Gain_Sign_Inverted,TC-VOLT-004,8,REQ-VOLT-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-002,Integral_Gain_Sign_Inverted,TC-VOLT-006,9,REQ-VOLT-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-003,Speed_Feedback_Sign_Fault,TC-DIR-001,1,REQ-DIR-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-003,Speed_Feedback_Sign_Fault,TC-DIR-002,2,REQ-DIR-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-003,Speed_Feedback_Sign_Fault,TC-REV-001,3,REQ-REV-001,PASS,INCONCLUSIVE_PRECONDITION,0,InconclusivePrecondition,PRECONDITION_NOT_MET,"A previous plateau did not establish the reversal precondition.",v1.0
+MUT-003,Speed_Feedback_Sign_Fault,TC-REV-003,4,REQ-REV-001,PASS,INCONCLUSIVE_PRECONDITION,0,InconclusivePrecondition,PRECONDITION_NOT_MET,"A previous plateau did not establish the reversal precondition.",v1.0
+MUT-003,Speed_Feedback_Sign_Fault,TC-TRK-003,5,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-003,Speed_Feedback_Sign_Fault,TC-TRK-005,6,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-003,Speed_Feedback_Sign_Fault,TC-TRK-007,7,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-003,Speed_Feedback_Sign_Fault,TC-VOLT-004,8,REQ-VOLT-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-003,Speed_Feedback_Sign_Fault,TC-VOLT-006,9,REQ-VOLT-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-004,Upper_Voltage_Limit_Too_High,TC-DIR-001,1,REQ-DIR-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-004,Upper_Voltage_Limit_Too_High,TC-DIR-002,2,REQ-DIR-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-004,Upper_Voltage_Limit_Too_High,TC-REV-001,3,REQ-REV-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-004,Upper_Voltage_Limit_Too_High,TC-REV-003,4,REQ-REV-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-004,Upper_Voltage_Limit_Too_High,TC-TRK-003,5,REQ-TRK-001,PASS,PASS,0,,APPLICABLE,"",v1.0
+MUT-004,Upper_Voltage_Limit_Too_High,TC-TRK-005,6,REQ-TRK-001,PASS,PASS,0,,APPLICABLE,"",v1.0
+MUT-004,Upper_Voltage_Limit_Too_High,TC-TRK-007,7,REQ-TRK-001,PASS,PASS,0,,APPLICABLE,"",v1.0
+MUT-004,Upper_Voltage_Limit_Too_High,TC-VOLT-004,8,REQ-VOLT-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-004,Upper_Voltage_Limit_Too_High,TC-VOLT-006,9,REQ-VOLT-001,PASS,FAIL,1,OracleFailure,NOT_REQUIRED,"Complete-interval Vcmd range [-12, +13] V exceeded limits.",v1.0
+MUT-005,Lower_Voltage_Limit_Too_Low,TC-DIR-001,1,REQ-DIR-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-005,Lower_Voltage_Limit_Too_Low,TC-DIR-002,2,REQ-DIR-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-005,Lower_Voltage_Limit_Too_Low,TC-REV-001,3,REQ-REV-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-005,Lower_Voltage_Limit_Too_Low,TC-REV-003,4,REQ-REV-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-005,Lower_Voltage_Limit_Too_Low,TC-TRK-003,5,REQ-TRK-001,PASS,PASS,0,,APPLICABLE,"",v1.0
+MUT-005,Lower_Voltage_Limit_Too_Low,TC-TRK-005,6,REQ-TRK-001,PASS,PASS,0,,APPLICABLE,"",v1.0
+MUT-005,Lower_Voltage_Limit_Too_Low,TC-TRK-007,7,REQ-TRK-001,PASS,PASS,0,,APPLICABLE,"",v1.0
+MUT-005,Lower_Voltage_Limit_Too_Low,TC-VOLT-004,8,REQ-VOLT-001,PASS,FAIL,1,OracleFailure,NOT_REQUIRED,"Complete-interval Vcmd range [-13, -1.0158596149996597] V exceeded limits.",v1.0
+MUT-005,Lower_Voltage_Limit_Too_Low,TC-VOLT-006,9,REQ-VOLT-001,PASS,FAIL,1,OracleFailure,NOT_REQUIRED,"Complete-interval Vcmd range [-13, +12] V exceeded limits.",v1.0
+MUT-006,Positive_Actuation_Disabled,TC-DIR-001,1,REQ-DIR-001,PASS,FAIL,1,OracleFailure,NOT_REQUIRED,"At least one required Oracle evaluation failed.",v1.0
+MUT-006,Positive_Actuation_Disabled,TC-DIR-002,2,REQ-DIR-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-006,Positive_Actuation_Disabled,TC-REV-001,3,REQ-REV-001,PASS,INCONCLUSIVE_PRECONDITION,0,InconclusivePrecondition,PRECONDITION_NOT_MET,"A previous plateau did not establish the reversal precondition.",v1.0
+MUT-006,Positive_Actuation_Disabled,TC-REV-003,4,REQ-REV-001,PASS,INCONCLUSIVE_PRECONDITION,0,InconclusivePrecondition,PRECONDITION_NOT_MET,"A previous plateau did not establish the reversal precondition.",v1.0
+MUT-006,Positive_Actuation_Disabled,TC-TRK-003,5,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-006,Positive_Actuation_Disabled,TC-TRK-005,6,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-006,Positive_Actuation_Disabled,TC-TRK-007,7,REQ-TRK-001,PASS,FAIL,1,OracleFailure,APPLICABLE,"At least one required Oracle evaluation failed.",v1.0
+MUT-006,Positive_Actuation_Disabled,TC-VOLT-004,8,REQ-VOLT-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0
+MUT-006,Positive_Actuation_Disabled,TC-VOLT-006,9,REQ-VOLT-001,PASS,PASS,0,,NOT_REQUIRED,"",v1.0

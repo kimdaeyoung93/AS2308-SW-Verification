@@ -1,0 +1,7 @@
+mutant_id,mutant_description,killed,assessment_status,first_killing_candidate,killing_execution_count,total_execution_count,inconclusive_execution_count,execution_error_count,total_mutants,killed_mutants,mutation_score_percent,total_kill_cells,total_execution_cells,kill_density_percent,protocol_version
+MUT-001,Disable the integral control path by overriding the Kis workspace variable with zero.,1,KILLED,TC-TRK-003,3,9,2,0,6,6,100,18,54,33.3333333333333,v1.0
+MUT-002,Invert the integral action sign while preserving the baseline gain magnitude.,1,KILLED,TC-DIR-001,5,9,2,0,6,6,100,18,54,33.3333333333333,v1.0
+MUT-003,Change the speed error calculation from reference minus feedback to reference plus feedback.,1,KILLED,TC-TRK-003,3,9,2,0,6,6,100,18,54,33.3333333333333,v1.0
+MUT-004,Raise only the positive controller output saturation limit from +12 V to +13 V while retaining the -12 V lower limit.,1,KILLED,TC-VOLT-006,1,9,0,0,6,6,100,18,54,33.3333333333333,v1.0
+MUT-005,Lower only the negative controller output saturation limit from -12 V to -13 V while retaining the +12 V upper limit.,1,KILLED,TC-VOLT-004,2,9,0,0,6,6,100,18,54,33.3333333333333,v1.0
+MUT-006,Disable positive actuation by setting the upper saturation limit to 0 V while retaining the -12 V lower limit.,1,KILLED,TC-DIR-001,4,9,2,0,6,6,100,18,54,33.3333333333333,v1.0

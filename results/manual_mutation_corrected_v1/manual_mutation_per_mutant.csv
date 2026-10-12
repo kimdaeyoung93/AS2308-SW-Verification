@@ -1,0 +1,7 @@
+MutationID,MutationName,Status,KilledByCount,FirstKillingTest,KillReason,DetectedRequirementTests,ProtocolVersion
+MUT-001,Integral_Path_Disabled,KILLED,2,MTC-002/IT-001,OracleFail,REQ-TRK-001,v1.0
+MUT-002,Integral_Gain_Sign_Inverted,KILLED,4,MTC-002/IT-001,OracleFail,REQ-TRK-001; REQ-DIR-001,v1.0
+MUT-003,Speed_Feedback_Sign_Fault,KILLED,2,MTC-002/IT-001,OracleFail,REQ-TRK-001,v1.0
+MUT-004,Upper_Voltage_Limit_Too_High,KILLED,1,MTC-001/IT-001,OracleFail,REQ-VOLT-001,v1.0
+MUT-005,Lower_Voltage_Limit_Too_Low,KILLED,1,MTC-001/IT-002,OracleFail,REQ-VOLT-001,v1.0
+MUT-006,Positive_Actuation_Disabled,KILLED,4,MTC-002/IT-001,OracleFail,REQ-TRK-001; REQ-DIR-001; REQ-REV-001,v1.0

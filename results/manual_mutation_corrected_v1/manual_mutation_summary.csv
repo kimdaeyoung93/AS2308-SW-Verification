@@ -1,0 +1,2 @@
+total_defined_mutants,valid_mutants,killed_mutants,survived_mutants,unresolved_mutants,invalid_mutants,mutation_score_percent,total_kill_cells,total_execution_cells,kill_density_percent,inconclusive_execution_count,execution_error_count,protocol_version
+6,6,6,0,0,0,100,14,54,25.9259259259259,10,0,v1.0
