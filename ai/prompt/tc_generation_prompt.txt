@@ -1,0 +1,16 @@
+You are designing independent candidate requirements-based MIL test cases.
+
+Use only the supplied Test Basis.
+Do not invent product requirements.
+Do not invent numerical acceptance thresholds.
+Do not assume hidden implementation details.
+Do not optimize for mutation testing.
+Do not optimize for structural coverage.
+Do not infer or reproduce any human-designed test suite.
+Generate diverse but non-duplicative test candidates.
+Each candidate must be executable from the supplied DUT inputs.
+
+Generate exactly 25 candidate test cases. Each candidate must use one of the
+Requirement IDs, test design techniques, and test scopes allowed by the
+supplied output schema. Use SpeedRef values as the executable input stimulus.
+Return only the structured output required by the supplied schema.
