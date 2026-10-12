@@ -1,0 +1,16 @@
+candidate_id,segment_index,reference_rps,start_time_s,end_time_s,evaluation_start_s,evaluation_end_s,applicability,direction_result,tracking_result,voltage_result,notes
+TC-DIR-001,1,5,0,2,1.95,2,NOT_REQUIRED,PASS,NOT_EVALUATED,NOT_EVALUATED,
+TC-DIR-002,1,-5,0,2,1.95,2,NOT_REQUIRED,PASS,NOT_EVALUATED,NOT_EVALUATED,
+TC-REV-001,1,5,0,2,NaN,NaN,NOT_REQUIRED,NOT_EVALUATED,NOT_EVALUATED,NOT_EVALUATED,Initial or non-reversal plateau; no REQ-REV Oracle evaluation.
+TC-REV-001,2,-5,2,4,3.9496,3.9996,NOT_REQUIRED,PASS,PASS,NOT_EVALUATED,Post-reversal plateau evaluated.
+TC-REV-003,1,0.5,0,2,NaN,NaN,NOT_REQUIRED,NOT_EVALUATED,NOT_EVALUATED,NOT_EVALUATED,Initial or non-reversal plateau; no REQ-REV Oracle evaluation.
+TC-REV-003,2,-0.5,2,4,3.9496,3.9996,NOT_REQUIRED,PASS,PASS,NOT_EVALUATED,Post-reversal plateau evaluated.
+TC-TRK-003,1,0.1,0,2,1.95,2,APPLICABLE,NOT_EVALUATED,PASS,NOT_EVALUATED,
+TC-TRK-005,1,19.9,0,2,1.95,2,APPLICABLE,NOT_EVALUATED,PASS,NOT_EVALUATED,
+TC-TRK-007,1,2,0,2,1.9496,1.9996,APPLICABLE,NOT_EVALUATED,PASS,NOT_EVALUATED,
+TC-TRK-007,2,10,2,4,3.9496,3.9996,APPLICABLE,NOT_EVALUATED,PASS,NOT_EVALUATED,
+TC-VOLT-004,1,-19.9,0,2,0,2,NOT_REQUIRED,NOT_EVALUATED,NOT_EVALUATED,PASS,Segment evidence; top-level Voltage Oracle uses the complete simulation interval.
+TC-VOLT-006,1,10,0,2,0,1.9996,NOT_REQUIRED,NOT_EVALUATED,NOT_EVALUATED,PASS,Segment evidence; top-level Voltage Oracle uses the complete simulation interval.
+TC-VOLT-006,2,-10,2,4,2,3.9996,NOT_REQUIRED,NOT_EVALUATED,NOT_EVALUATED,PASS,Segment evidence; top-level Voltage Oracle uses the complete simulation interval.
+TC-VOLT-006,3,10,4,6,4,5.9996,NOT_REQUIRED,NOT_EVALUATED,NOT_EVALUATED,PASS,Segment evidence; top-level Voltage Oracle uses the complete simulation interval.
+TC-VOLT-006,4,-10,6,8,6,7.9996,NOT_REQUIRED,NOT_EVALUATED,NOT_EVALUATED,PASS,Segment evidence; top-level Voltage Oracle uses the complete simulation interval.

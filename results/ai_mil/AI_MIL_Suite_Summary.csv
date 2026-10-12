@@ -1,0 +1,10 @@
+selection_order,candidate_id,requirement_id,test_scope,test_design_technique,total_duration_s,status,oracle,applicability,failure_reason
+1,TC-DIR-001,REQ-DIR-001,nominal,Equivalence Partitioning,2,PASS,Direction Oracle,NOT_REQUIRED,
+2,TC-DIR-002,REQ-DIR-001,nominal,Equivalence Partitioning,2,PASS,Direction Oracle,NOT_REQUIRED,
+3,TC-REV-001,REQ-REV-001,nominal,State Transition,4,PASS,Direction + Tracking,NOT_REQUIRED,
+4,TC-REV-003,REQ-REV-001,nominal,Boundary Value Analysis,4,PASS,Direction + Tracking,NOT_REQUIRED,
+5,TC-TRK-003,REQ-TRK-001,nominal,Boundary Value Analysis,2,PASS,Tracking Oracle,APPLICABLE,
+6,TC-TRK-005,REQ-TRK-001,stress,Boundary Value Analysis,2,PASS,Tracking Oracle,APPLICABLE,
+7,TC-TRK-007,REQ-TRK-001,stress,Scenario-Based,4,PASS,Tracking Oracle,APPLICABLE,
+8,TC-VOLT-004,REQ-VOLT-001,stress,Boundary Value Analysis,2,PASS,Voltage Oracle,NOT_REQUIRED,
+9,TC-VOLT-006,REQ-VOLT-001,stress,Scenario-Based,8,PASS,Voltage Oracle,NOT_REQUIRED,
