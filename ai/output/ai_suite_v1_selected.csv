@@ -1,0 +1,10 @@
+﻿selection_order,candidate_id,requirement_id,test_scope,test_design_technique,input_summary,polarity,reversal,multi_segment,selection_reason
+1,TC-DIR-001,REQ-DIR-001,nominal,Equivalence Partitioning,+5 rps,positive,False,False,Selected by the frozen deterministic lexicographic protocol within the REQ-DIR-001 quota.
+2,TC-DIR-002,REQ-DIR-001,nominal,Equivalence Partitioning,-5 rps,negative,False,False,Selected by the frozen deterministic lexicographic protocol within the REQ-DIR-001 quota.
+3,TC-REV-001,REQ-REV-001,nominal,State Transition,+5 rps -> -5 rps,positive+negative,True,True,"Selected by the frozen deterministic lexicographic protocol within the REQ-REV-001 quota; input characteristics: reversal, multi-segment."
+4,TC-REV-003,REQ-REV-001,nominal,Boundary Value Analysis,+0.5 rps -> -0.5 rps,positive+negative,True,True,"Selected by the frozen deterministic lexicographic protocol within the REQ-REV-001 quota; input characteristics: reversal, multi-segment."
+5,TC-TRK-003,REQ-TRK-001,nominal,Boundary Value Analysis,+0.1 rps,positive,False,False,Selected by the frozen deterministic lexicographic protocol within the REQ-TRK-001 quota.
+6,TC-TRK-005,REQ-TRK-001,stress,Boundary Value Analysis,+19.9 rps,positive,False,False,Selected by the frozen deterministic lexicographic protocol within the REQ-TRK-001 quota.
+7,TC-TRK-007,REQ-TRK-001,stress,Scenario-Based,+2 rps -> +10 rps,positive,False,True,Selected by the frozen deterministic lexicographic protocol within the REQ-TRK-001 quota; input characteristics: multi-segment.
+8,TC-VOLT-004,REQ-VOLT-001,stress,Boundary Value Analysis,-19.9 rps,negative,False,False,Selected by the frozen deterministic lexicographic protocol within the REQ-VOLT-001 quota.
+9,TC-VOLT-006,REQ-VOLT-001,stress,Scenario-Based,+10 rps -> -10 rps -> +10 rps -> -10 rps,positive+negative,True,True,"Selected by the frozen deterministic lexicographic protocol within the REQ-VOLT-001 quota; input characteristics: reversal, multi-segment."
