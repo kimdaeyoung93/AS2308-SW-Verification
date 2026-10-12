@@ -307,7 +307,7 @@ def main() -> int:
             config=types.GenerateContentConfig(
                 system_instruction=prompt_text,
                 response_mime_type="application/json",
-                response_schema=output_schema,
+                response_json_schema=output_schema,
                 thinking_config=types.ThinkingConfig(
                     thinking_budget=THINKING_BUDGET
                 ),
