@@ -1,5 +1,5 @@
 function [executionResults, killMatrix, summary, perMutant, detailData] = ...
-        run_manual_mutation_analysis()
+        run_manual_mutation_analysis(varargin)
 %RUN_MANUAL_MUTATION_ANALYSIS Execute the frozen primary mutation set.
 %
 %   Runs the frozen Manual Dynamic MIL Test Suite v1.0 first without a
@@ -8,16 +8,24 @@ function [executionResults, killMatrix, summary, perMutant, detailData] = ...
 %   Simulink.SimulationInput run-time overrides.
 %
 %   No static configuration check kills a mutant. A valid mutant is killed
-%   only when an execution that passed on the baseline fails through its
-%   existing Oracle, a simulation error, or non-finite simulation output.
-%   The model file is never saved by this runner.
+%   only by healthy PASS -> mutant FAIL. Execution errors and inconclusive
+%   preconditions are recorded without being counted as kills.
+
+    parser = inputParser;
+    parser.FunctionName = mfilename;
+    addParameter(parser, 'RunMutations', true, ...
+        @(x) islogical(x) && isscalar(x));
+    parse(parser, varargin{:});
+    runMutations = parser.Results.RunMutations;
+    protocolVersion = "v1.0";
 
     modelName = 'AS2308_MIL_Baseline_v3';
     runnerDirectory = fileparts(mfilename('fullpath'));
     repositoryRoot = fileparts(runnerDirectory);
     modelDirectory = fullfile(repositoryRoot, 'model');
     oracleDirectory = fullfile(runnerDirectory, 'oracles');
-    resultsDirectory = fullfile(repositoryRoot, 'results');
+    resultsDirectory = fullfile( ...
+        repositoryRoot, 'results', 'manual_mutation_corrected_v1');
     mutationFile = fullfile( ...
         repositoryRoot, 'mutations', '01_Mutation_Set.csv');
     modelFile = fullfile(modelDirectory, [modelName, '.slx']);
@@ -76,15 +84,58 @@ function [executionResults, killMatrix, summary, perMutant, detailData] = ...
     fprintf('Baseline consistency check (no mutation)\n');
     baselineResults = localRunSuiteVariant( ...
         modelName, simulationVariables, baselineKis, paths, ...
-        executionDefinitions, "BASELINE");
-    baselinePassCount = sum(baselineResults.Pass);
+        executionDefinitions, "BASELINE", table());
+    baselinePassCount = sum(baselineResults.Status == "PASS");
+    baselineExecutionErrors = sum( ...
+        baselineResults.Status == "EXECUTION_ERROR");
+    trackingRows = baselineResults.RequirementID == "REQ-TRK-001";
+    reversalRows = baselineResults.RequirementID == "REQ-REV-001";
+    trackingApplicabilityConfirmed = all( ...
+        baselineResults.Applicability(trackingRows) == "APPLICABLE");
+    reversalSetupEstablished = all( ...
+        baselineResults.ReversalSetup(reversalRows) == "ESTABLISHED");
     fprintf('Baseline result: %d/9 PASS\n\n', baselinePassCount);
-    if height(baselineResults) ~= 9 || baselinePassCount ~= 9
-        failedRows = baselineResults(~baselineResults.Pass, :);
+    if height(baselineResults) ~= 9 || baselinePassCount ~= 9 || ...
+            baselineExecutionErrors ~= 0 || ...
+            ~trackingApplicabilityConfirmed || ~reversalSetupEstablished
+        failedRows = baselineResults(baselineResults.Status ~= "PASS", :);
         disp(failedRows);
         error('run_manual_mutation_analysis:BaselineConsistencyFailed', ...
             ['Baseline consistency check failed (%d/9 PASS). ', ...
              'Mutation execution was not started.'], baselinePassCount);
+    end
+
+    if ~isfolder(resultsDirectory)
+        mkdir(resultsDirectory);
+    end
+    baselineResults.ProtocolVersion = repmat( ...
+        protocolVersion, height(baselineResults), 1);
+    healthyBaselineCsv = fullfile( ...
+        resultsDirectory, 'Manual_Corrected_Healthy_Baseline.csv');
+    writetable(baselineResults, healthyBaselineCsv);
+
+    if ~runMutations
+        executionResults = table();
+        killMatrix = table();
+        summary = table( ...
+            protocolVersion, baselinePassCount, baselineExecutionErrors, ...
+            trackingApplicabilityConfirmed, reversalSetupEstablished, ...
+            false, 'VariableNames', { ...
+            'protocol_version', 'baseline_passed_execution_count', ...
+            'baseline_execution_error_count', ...
+            'tracking_applicability_confirmed', ...
+            'reversal_setup_established', 'mutation_phase_executed'});
+        perMutant = table();
+        detailData = struct( ...
+            'baseline_results', baselineResults, ...
+            'baseline_consistency_pass', true, ...
+            'protocol_version', protocolVersion, ...
+            'mutation_phase_executed', false, ...
+            'healthy_baseline_csv', string(healthyBaselineCsv));
+        fprintf(['Corrected healthy baseline accepted. ', ...
+            'Mutation phase executed: false\n']);
+        clear closeModel;
+        return;
     end
 
     %% Execute the six frozen primary mutants
@@ -113,8 +164,9 @@ function [executionResults, killMatrix, summary, perMutant, detailData] = ...
 
         mutantResultCells{mutantIndex} = localRunSuiteVariant( ...
             modelName, simulationVariables, baselineKis, paths, ...
-            executionDefinitions, mutationID);
-        killedCount = sum(~mutantResultCells{mutantIndex}.Pass);
+            executionDefinitions, mutationID, baselineResults);
+        killedCount = sum( ...
+            mutantResultCells{mutantIndex}.Status == "FAIL");
         fprintf('  killing executions: %d/9\n\n', killedCount);
     end
 
@@ -124,7 +176,7 @@ function [executionResults, killMatrix, summary, perMutant, detailData] = ...
     TestCaseID = strings(totalRows, 1);
     IterationID = strings(totalRows, 1);
     RequirementID = strings(totalRows, 1);
-    BaselineResult = repmat("PASS", totalRows, 1);
+    BaselineResult = strings(totalRows, 1);
     MutantResult = strings(totalRows, 1);
     KilledByExecution = false(totalRows, 1);
     KillReason = strings(totalRows, 1);
@@ -145,15 +197,16 @@ function [executionResults, killMatrix, summary, perMutant, detailData] = ...
                 executionDefinitions.IterationID(executionIndex);
             RequirementID(outputRow) = ...
                 executionDefinitions.RequirementID(executionIndex);
+            BaselineResult(outputRow) = ...
+                baselineResults.Status(executionIndex);
             if applicability(mutantIndex)
-                if results.Pass(executionIndex)
-                    MutantResult(outputRow) = "PASS";
-                else
-                    MutantResult(outputRow) = "FAIL";
+                MutantResult(outputRow) = results.Status(executionIndex);
+                if BaselineResult(outputRow) == "PASS" && ...
+                        MutantResult(outputRow) == "FAIL"
                     KilledByExecution(outputRow) = true;
                 end
             else
-                MutantResult(outputRow) = "INVALID";
+                MutantResult(outputRow) = "INVALID_MUTANT";
             end
             KillReason(outputRow) = results.KillReason(executionIndex);
             KeyMetric(outputRow) = results.KeyMetric(executionIndex);
@@ -189,6 +242,10 @@ function [executionResults, killMatrix, summary, perMutant, detailData] = ...
         end
 
         matrixValues(mutantIndex, :) = "PASS";
+        matrixValues(mutantIndex, rows.MutantResult == ...
+            "INCONCLUSIVE_PRECONDITION") = "INCONCLUSIVE";
+        matrixValues(mutantIndex, rows.MutantResult == ...
+            "EXECUTION_ERROR") = "ERROR";
         matrixValues(mutantIndex, rows.KilledByExecution) = "KILL";
         killedByCount(mutantIndex) = sum(rows.KilledByExecution);
         if killedByCount(mutantIndex) > 0
@@ -247,6 +304,11 @@ function [executionResults, killMatrix, summary, perMutant, detailData] = ...
     if ~isfolder(resultsDirectory)
         mkdir(resultsDirectory);
     end
+    executionResults.ProtocolVersion = repmat( ...
+        protocolVersion, height(executionResults), 1);
+    perMutant.ProtocolVersion = repmat( ...
+        protocolVersion, height(perMutant), 1);
+    summary.protocol_version = protocolVersion;
     executionCsv = fullfile( ...
         resultsDirectory, 'manual_mutation_execution_results.csv');
     matrixCsv = fullfile( ...
@@ -309,13 +371,16 @@ end
 
 function results = localRunSuiteVariant( ...
         modelName, simulationVariables, baselineKis, paths, ...
-        definitions, mutationID)
+        definitions, mutationID, baselineResults)
     executionCount = height(definitions);
     Pass = false(executionCount, 1);
     KillReason = strings(executionCount, 1);
     KeyMetric = strings(executionCount, 1);
     KeyMetricValue = NaN(executionCount, 1);
     ErrorMessage = strings(executionCount, 1);
+    Status = strings(executionCount, 1);
+    Applicability = repmat("NOT_REQUIRED", executionCount, 1);
+    ReversalSetup = repmat("NOT_REQUIRED", executionCount, 1);
 
     for executionIndex = 1:executionCount
         definition = definitions(executionIndex, :);
@@ -323,13 +388,16 @@ function results = localRunSuiteVariant( ...
             definition.TestCaseID, definition.IterationID);
         result = localRunExecution( ...
             modelName, simulationVariables, baselineKis, paths, ...
-            definition.Kind, mutationID);
+            definition.Kind, mutationID, baselineResults, definition);
         Pass(executionIndex) = result.pass;
+        Status(executionIndex) = result.status;
+        Applicability(executionIndex) = result.applicability;
+        ReversalSetup(executionIndex) = result.reversalSetup;
         KillReason(executionIndex) = result.killReason;
         KeyMetric(executionIndex) = result.keyMetric;
         KeyMetricValue(executionIndex) = result.keyMetricValue;
         ErrorMessage(executionIndex) = result.errorMessage;
-        fprintf('%s', localPassFail(result.pass));
+        fprintf('%s', result.status);
         if strlength(result.killReason) > 0
             fprintf(' (%s)', result.killReason);
         end
@@ -337,13 +405,18 @@ function results = localRunSuiteVariant( ...
     end
 
     results = [definitions, table( ...
-        Pass, KillReason, KeyMetric, KeyMetricValue, ErrorMessage)];
+        Pass, Status, Applicability, ReversalSetup, KillReason, ...
+        KeyMetric, KeyMetricValue, ErrorMessage)];
 end
 
 function result = localRunExecution( ...
-        modelName, simulationVariables, baselineKis, paths, kind, mutationID)
+        modelName, simulationVariables, baselineKis, paths, kind, ...
+        mutationID, baselineResults, definition)
     result = struct( ...
-        'pass', false, 'killReason', "", 'keyMetric', "", ...
+        'pass', false, 'status', "EXECUTION_ERROR", ...
+        'applicability', "NOT_REQUIRED", ...
+        'reversalSetup', "NOT_REQUIRED", ...
+        'killReason', "", 'keyMetric', "", ...
         'keyMetricValue', NaN, 'errorMessage', "");
 
     try
@@ -390,7 +463,7 @@ function result = localRunExecution( ...
         end
         simulationOutput = sim(simulationInput);
     catch exception
-        result.killReason = "SimulationError";
+        result.killReason = "ExecutionError";
         result.errorMessage = string(exception.message);
         return;
     end
@@ -398,17 +471,18 @@ function result = localRunExecution( ...
     try
         signals = localExtractSignals(simulationOutput);
     catch exception
-        result.killReason = "SimulationError";
+        result.killReason = "ExecutionError";
         result.errorMessage = string(exception.message);
         return;
     end
 
     if localHasNonFinite(signals)
-        result.killReason = "NonFinite";
+        result.killReason = "ExecutionError";
         result.errorMessage = "One or more logged signals contain NaN or Inf.";
         return;
     end
 
+    result.status = "";
     try
         switch kind
             case "VoltagePositive"
@@ -422,11 +496,29 @@ function result = localRunExecution( ...
                 result.keyMetric = "min_vcmd_v";
                 result.keyMetricValue = oracle.min_vcmd_v;
             case {"TrackingPositive", "TrackingNegative"}
-                oracle = evaluate_tracking( ...
-                    signals.time, signals.reference, signals.motorspeed);
-                result.pass = oracle.pass;
-                result.keyMetric = "max_abs_error_rps";
-                result.keyMetricValue = oracle.max_abs_error_rps;
+                if mutationID == "BASELINE"
+                    persistentClamp = localPersistentTerminalClamp( ...
+                        signals.time, signals.rawPiOutput, signals.Vcmd, ...
+                        12, 0.05);
+                    if persistentClamp
+                        frozenApplicability = "PRECONDITION_NOT_MET";
+                    else
+                        frozenApplicability = "APPLICABLE";
+                    end
+                else
+                    frozenApplicability = localBaselineField( ...
+                        baselineResults, definition, 'Applicability');
+                end
+                result.applicability = frozenApplicability;
+                if frozenApplicability == "PRECONDITION_NOT_MET"
+                    result.status = "INCONCLUSIVE_PRECONDITION";
+                else
+                    oracle = evaluate_tracking( ...
+                        signals.time, signals.reference, signals.motorspeed);
+                    result.pass = oracle.pass;
+                    result.keyMetric = "max_abs_error_rps";
+                    result.keyMetricValue = oracle.max_abs_error_rps;
+                end
             case {"DirectionPositive", "DirectionNegative"}
                 oracle = evaluate_direction( ...
                     signals.time, signals.reference, signals.motorspeed);
@@ -435,27 +527,37 @@ function result = localRunExecution( ...
                 result.keyMetricValue = oracle.mismatch_sample_count;
             case {"SinglePositiveToNegative", ...
                     "SingleNegativeToPositive"}
-                directionResult = evaluate_direction( ...
-                    signals.time, signals.reference, signals.motorspeed);
-                trackingResult = evaluate_tracking( ...
-                    signals.time, signals.reference, signals.motorspeed);
-                result.pass = directionResult.pass && trackingResult.pass;
+                [result.status, result.pass, setupEstablished, ...
+                    trackingMetric] = localEvaluateSingleReversal(signals);
+                result.reversalSetup = localEstablishedText( ...
+                    setupEstablished);
                 result.keyMetric = "tracking_max_abs_error_rps";
-                result.keyMetricValue = trackingResult.max_abs_error_rps;
+                result.keyMetricValue = trackingMetric;
             case "RepeatedReversal"
-                [result.pass, passedSegments] = ...
+                [result.status, result.pass, passedTransitions, ...
+                    setupEstablished] = ...
                     localEvaluateRepeatedReversal(signals);
-                result.keyMetric = "passed_segment_count";
-                result.keyMetricValue = passedSegments;
+                result.reversalSetup = localEstablishedText( ...
+                    setupEstablished);
+                result.keyMetric = "passed_transition_count";
+                result.keyMetricValue = passedTransitions;
         end
     catch exception
         result.pass = false;
-        result.killReason = "OracleError";
+        result.status = "EXECUTION_ERROR";
+        result.killReason = "ExecutionError";
         result.errorMessage = string(exception.message);
         return;
     end
 
-    if ~result.pass
+    if result.status == "EXECUTION_ERROR"
+        return;
+    elseif result.status == "INCONCLUSIVE_PRECONDITION"
+        result.killReason = "InconclusivePrecondition";
+    elseif result.pass
+        result.status = "PASS";
+    else
+        result.status = "FAIL";
         result.killReason = "OracleFail";
     end
 end
@@ -586,7 +688,43 @@ function nonFinite = localHasNonFinite(signals)
         any(~isfinite(signals.Vcmd));
 end
 
-function [overallPass, passedSegments] = ...
+function [status, overallPass, setupEstablished, trackingMetric] = ...
+        localEvaluateSingleReversal(signals)
+    switchingTime_s = 2;
+    preRows = signals.time < switchingTime_s;
+    postRows = signals.time >= switchingTime_s;
+    assert(any(preRows) && any(postRows), ...
+        'run_manual_mutation_analysis:MissingReversalPlateau', ...
+        'Single reversal requires pre- and post-reversal samples.');
+    setupDirection = evaluate_direction( ...
+        signals.time(preRows), signals.reference(preRows), ...
+        signals.motorspeed(preRows));
+    setupTracking = evaluate_tracking( ...
+        signals.time(preRows), signals.reference(preRows), ...
+        signals.motorspeed(preRows));
+    setupEstablished = setupDirection.pass && setupTracking.pass;
+    trackingMetric = NaN;
+    overallPass = false;
+    if ~setupEstablished
+        status = "INCONCLUSIVE_PRECONDITION";
+        return;
+    end
+    directionResult = evaluate_direction( ...
+        signals.time(postRows), signals.reference(postRows), ...
+        signals.motorspeed(postRows));
+    trackingResult = evaluate_tracking( ...
+        signals.time(postRows), signals.reference(postRows), ...
+        signals.motorspeed(postRows));
+    trackingMetric = trackingResult.max_abs_error_rps;
+    overallPass = directionResult.pass && trackingResult.pass;
+    if overallPass
+        status = "PASS";
+    else
+        status = "FAIL";
+    end
+end
+
+function [status, overallPass, passedTransitions, setupEstablished] = ...
         localEvaluateRepeatedReversal(signals)
     plateauDuration_s = 2;
     totalSegmentCount = 6;
@@ -621,8 +759,60 @@ function [overallPass, passedSegments] = ...
         segmentPass(segmentIndex) = ...
             directionResult.pass && trackingResult.pass;
     end
-    passedSegments = sum(segmentPass);
-    overallPass = all(segmentPass);
+    setupEstablished = segmentPass(1);
+    transitionStatus = strings(totalSegmentCount - 1, 1);
+    for segmentIndex = 2:totalSegmentCount
+        if ~segmentPass(segmentIndex - 1)
+            transitionStatus(segmentIndex - 1) = ...
+                "INCONCLUSIVE_PRECONDITION";
+        elseif segmentPass(segmentIndex)
+            transitionStatus(segmentIndex - 1) = "PASS";
+        else
+            transitionStatus(segmentIndex - 1) = "FAIL";
+        end
+    end
+    if any(transitionStatus == "FAIL")
+        status = "FAIL";
+    elseif any(transitionStatus == "INCONCLUSIVE_PRECONDITION")
+        status = "INCONCLUSIVE_PRECONDITION";
+    else
+        status = "PASS";
+    end
+    passedTransitions = sum(transitionStatus == "PASS");
+    overallPass = status == "PASS";
+end
+
+function persistentClamp = localPersistentTerminalClamp( ...
+        time, rawPiOutput, vcmd, voltageLimit, evaluationWindow_s)
+    rows = time >= time(end) - evaluationWindow_s;
+    assert(any(rows), ...
+        'run_manual_mutation_analysis:EmptyApplicabilityWindow', ...
+        'No samples were found in the Tracking applicability window.');
+    terminalRawPi = rawPiOutput(rows);
+    terminalVcmd = vcmd(rows);
+    numericTolerance_v = 64 * eps(max([1; abs(terminalVcmd); voltageLimit]));
+    positiveClamp = terminalRawPi > voltageLimit & ...
+        abs(terminalVcmd - voltageLimit) <= numericTolerance_v;
+    negativeClamp = terminalRawPi < -voltageLimit & ...
+        abs(terminalVcmd + voltageLimit) <= numericTolerance_v;
+    persistentClamp = all(positiveClamp | negativeClamp);
+end
+
+function value = localBaselineField(baselineResults, definition, fieldName)
+    rows = baselineResults.TestCaseID == definition.TestCaseID & ...
+        baselineResults.IterationID == definition.IterationID;
+    assert(sum(rows) == 1, ...
+        'run_manual_mutation_analysis:MissingBaselineAdjudication', ...
+        'Expected one healthy baseline adjudication row.');
+    value = baselineResults.(fieldName)(rows);
+end
+
+function text = localEstablishedText(value)
+    if value
+        text = "ESTABLISHED";
+    else
+        text = "NOT_ESTABLISHED";
+    end
 end
 
 function [valid, reason] = localValidateMutationApplicability( ...
@@ -675,8 +865,12 @@ function rows = localInvalidExecutionRows(definitions, reason)
     KeyMetric = strings(rowCount, 1);
     KeyMetricValue = NaN(rowCount, 1);
     ErrorMessage = repmat(reason, rowCount, 1);
+    Status = repmat("INVALID_MUTANT", rowCount, 1);
+    Applicability = repmat("NOT_EVALUATED", rowCount, 1);
+    ReversalSetup = repmat("NOT_EVALUATED", rowCount, 1);
     rows = [definitions, table( ...
-        Pass, KillReason, KeyMetric, KeyMetricValue, ErrorMessage)];
+        Pass, Status, Applicability, ReversalSetup, KillReason, ...
+        KeyMetric, KeyMetricValue, ErrorMessage)];
 end
 
 function localValidateMutationFile(mutations)
@@ -729,14 +923,6 @@ function signal = localGetLoggedSignal(loggedSignals, signalName)
             'Logged signal "%s" was not found.', signalName);
     end
     signal = signalElement.Values;
-end
-
-function text = localPassFail(pass)
-    if pass
-        text = 'PASS';
-    else
-        text = 'FAIL';
-    end
 end
 
 function localCloseModel(modelName, modelWasLoaded)

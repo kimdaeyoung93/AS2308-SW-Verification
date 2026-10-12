@@ -1,0 +1,10 @@
+TestCaseID,IterationID,RequirementID,Kind,Pass,Status,Applicability,ReversalSetup,KillReason,KeyMetric,KeyMetricValue,ErrorMessage,ProtocolVersion
+MTC-001,IT-001,REQ-VOLT-001,VoltagePositive,1,PASS,NOT_REQUIRED,NOT_REQUIRED,,max_vcmd_v,12,,v1.0
+MTC-001,IT-002,REQ-VOLT-001,VoltageNegative,1,PASS,NOT_REQUIRED,NOT_REQUIRED,,min_vcmd_v,-12,,v1.0
+MTC-002,IT-001,REQ-TRK-001,TrackingPositive,1,PASS,APPLICABLE,NOT_REQUIRED,,max_abs_error_rps,1.11022302462516e-15,,v1.0
+MTC-002,IT-002,REQ-TRK-001,TrackingNegative,1,PASS,APPLICABLE,NOT_REQUIRED,,max_abs_error_rps,1.11022302462516e-15,,v1.0
+MTC-003,IT-001,REQ-DIR-001,DirectionPositive,1,PASS,NOT_REQUIRED,NOT_REQUIRED,,direction_mismatch_sample_count,0,,v1.0
+MTC-003,IT-002,REQ-DIR-001,DirectionNegative,1,PASS,NOT_REQUIRED,NOT_REQUIRED,,direction_mismatch_sample_count,0,,v1.0
+MTC-004,IT-001,REQ-REV-001,SinglePositiveToNegative,1,PASS,NOT_REQUIRED,ESTABLISHED,,tracking_max_abs_error_rps,1.06581410364015e-14,,v1.0
+MTC-004,IT-002,REQ-REV-001,SingleNegativeToPositive,1,PASS,NOT_REQUIRED,ESTABLISHED,,tracking_max_abs_error_rps,1.06581410364015e-14,,v1.0
+MTC-005,IT-001,REQ-REV-001,RepeatedReversal,1,PASS,NOT_REQUIRED,ESTABLISHED,,passed_transition_count,5,,v1.0
