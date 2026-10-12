@@ -21,3 +21,6 @@ results/reference_filter_*_rps.csv
 # Direction-reversal raw time-series results
 results/direction_reversal_*_to_*.csv
 results/coverage/AS2308_MIL_Baseline_v3_cvdata*.cvt
+
+__pycache__/
+*.pyc
