@@ -1,9 +1,9 @@
-# AS2308 SIL Back-to-Back Verification Protocol v1.1 Draft
+# AS2308 SIL Back-to-Back Verification Protocol v1.1
 
 | 항목 | 내용 |
 |---|---|
 | 문서 버전 | v1.1 |
-| 문서 상태 | Draft — Not Frozen |
+| 문서 상태 | Frozen |
 | Verification Level | Host SIL Back-to-Back Characterization / Equivalence Verification |
 | Source Model | `model/AS2308_MIL_Baseline_v3.slx` |
 | Source Model SHA-256 | `4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D` |
@@ -486,11 +486,11 @@ Implementation 전에 다음 사항을 확인해야 한다.
 8. Generated artifacts와 derived model의 immutable identity를 어떤 checksum schema로 기록할 것인가?
 9. Optional `raw_pi_output` diagnostic output을 primary interface나 control behavior 변경 없이 안정적으로 보존할 수 있는가?
 
-본 문서는 **v1.1 Draft — Not Frozen**이다. Architecture와 implementation risk를 검토한 후 별도의 승인 절차로 freeze한다. Numerical tolerance는 아직 미정이며 Phase A characterization 이후 별도 revision에서 정의한다.
+본 문서는 **v1.1 Frozen**이다. Phase A characterization 완료 전까지 architecture, equivalence gate, characterization set 및 execution semantics를 변경하지 않는다.
 
 ## Revision Note
 
-### v1.1 Draft
+### v1.1 Frozen
 
 - v1.0 첫 Phase A attempt의 observability 및 repeated-build limitation을 기록했다.
 - Continuous closed-loop derived verification model을 top-model SIL로 실행하는 architecture로 개정했다.
