@@ -1,0 +1,23 @@
+Protocol: v1.1 Frozen
+Phase: A Characterization
+Overall execution status: EXECUTION_OK
+No numerical equivalence tolerance or equivalence PASS/FAIL is defined.
+MATLAB release: 2023b
+Simulink version: 23.2
+Host platform: win64
+Compiler/toolchain: Microsoft Visual C++ 2022 (C) 17.0
+SystemTargetFile: grt.tlc
+Solver / FixedStep: ode4 / ts
+Kps/Kis/Kas/Vdc/ts: 0.11497347265603371 / 2.041928874371159 / 17.760000000000002 / 12 / 0.00040000000000000002
+Source model: C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\model\AS2308_MIL_Baseline_v3.slx
+Source SHA before/after: 4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D / 4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D
+Derived model: C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\model\verification\AS2308_SIL_B2B_Verification_v1.slx
+Derived SHA before/after: 0223B483023B87DE70FA440558AF651DF4B21DCD9B8C7095772A6CDFAB18D565 / 0223B483023B87DE70FA440558AF651DF4B21DCD9B8C7095772A6CDFAB18D565
+Integrity check: 1
+Build artifact root: C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\build\sil_b2b_characterization_v1_1
+Observation: yout Dataset Outport 1 = sampled_Vcmd; Outport 2 = sampled_MotorSpeed.
+Continuous internal signal logging was disabled and was not used as required SIL observation.
+SIL-CHAR-001 status: EXECUTION_OK
+SIL-CHAR-002 status: EXECUTION_OK
+SIL-CHAR-003 status: EXECUTION_OK
+Execution timestamp: 2026-10-13T17:12:10+09:00

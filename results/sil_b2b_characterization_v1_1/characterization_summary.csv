@@ -1,0 +1,4 @@
+ProtocolVersion,ScenarioID,SourceScenario,InputDescription,Status,NormalExecutionSuccess,SILExecutionSuccess,NormalSampleCount,SILSampleCount,NormalStartTime_s,NormalStopTime_s,SILStartTime_s,SILStopTime_s,TimeGridEqual,CodeGenerationOccurred,CompilationOccurred,RelinkOccurred,NormalElapsed_s,SILBuildExecutionElapsed_s,WarningOccurred,UnsupportedContinuousWarning,WarningClassification,NormalWarningIdentifier,NormalWarningText,SILWarningIdentifier,SILWarningText,ErrorIdentifier,ErrorMessage
+v1.1 Frozen,SIL-CHAR-001,MTC-002 / IT-001,"+2 rps, 0-1 s",EXECUTION_OK,1,1,2501,2501,0,1,0,1,1,1,1,1,0.2063882,20.709275,0,0,NONE,,,,,,
+v1.1 Frozen,SIL-CHAR-002,MTC-001 / IT-001,"+16.75 rps, 0-1 s",EXECUTION_OK,1,1,2501,2501,0,1,0,1,1,0,0,0,0.1368494,3.4299445,0,0,NONE,,,,,,
+v1.1 Frozen,SIL-CHAR-003,MTC-004 / IT-001,"+15 rps [0,2 s), -15 rps [2,4 s]",EXECUTION_OK,1,1,10001,10001,0,4,0,4,1,1,1,1,0.2147216,16.0742899,0,0,NONE,,,,,,
