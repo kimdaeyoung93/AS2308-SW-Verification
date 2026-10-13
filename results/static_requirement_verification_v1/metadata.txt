@@ -1,0 +1,33 @@
+Artifact: Static Requirement Verification v1
+Requirements: REQ-BW-001, REQ-PI-001, REQ-AW-001
+Verification method: read-only source-script inspection and frozen Simulink model configuration/topology inspection
+MATLAB release: R2023b
+Source script: model/AS2308_calculate_pi_control_cc.m
+Frozen model: model/AS2308_MIL_Baseline_v3.slx
+Authoritative frozen model SHA-256: 4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D
+Frozen model SHA-256 before: 4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D
+Frozen model SHA-256 after: 4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D
+Source model Dirty before inspection: off
+Source model Dirty after inspection: off
+Simulation executed: no
+Model saved or modified: no
+f_cs: 40
+a: 17.760000000000002
+b: 2185.96
+w_cs: 251.32741228718345
+Kps observed: 0.11497347265603371
+Kps expected from w_cs/b: 0.11497347265603371
+Kps expected-observed difference: 0
+Kis observed: 2.041928874371159
+Kis expected from a*Kps: 2.041928874371159
+Kis expected-observed difference: 0
+Kas observed: 17.760000000000002
+Kas expected from Kis/Kps: 17.760000000000002
+Kas expected-observed difference: 0
+PI block parameters: Gain=Kis; Gain1=Kps; Gain2=1; Gain3=Kas; Saturation UpperLimit=Vdc; Saturation LowerLimit=-Vdc
+Error Sum: Subtract Inputs=+-
+Anti-windup difference Sum: Subtract2 Inputs=+-; sources are raw PI Add output and saturated Vcmd
+Integrator input Sum: Subtract1 Inputs=+-; sources are Kis*error and Kas*(raw PI output - Vcmd)
+Integrator block type: Integrator (continuous)
+Dynamic anti-windup recovery effectiveness: not evaluated
+Status vocabulary: PASS, FAIL, EXECUTION_ERROR
