@@ -1,0 +1,4 @@
+ScenarioID,FrozenTestCase,InputDefinition,StageA_Status,StageB_Status,Overall_Status,Notes
+GATE-001,MTC-002 / IT-001,"+2 rps, 0-1 s",PASS,PASS,PASS,
+GATE-002,MTC-001 / IT-001,"+16.75 rps, 0-1 s",PASS,PASS,PASS,
+GATE-003,MTC-004 / IT-001,"+15 rps [0,2 s), -15 rps [2,4 s]",PASS,PASS,PASS,

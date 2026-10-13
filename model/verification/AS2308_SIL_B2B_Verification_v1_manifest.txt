@@ -1,0 +1,18 @@
+Protocol version: v1.1 Frozen
+Source path: C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\model\AS2308_MIL_Baseline_v3.slx
+Source SHA-256: 4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D
+Derived path: C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\model\verification\AS2308_SIL_B2B_Verification_v1.slx
+MATLAB release: 2023b
+Solver: ode4
+FixedStep: ts (ts = 0.00040000000000000002 s)
+Kps: 0.11497347265603371
+Kis: 2.041928874371159
+Kas: 17.760000000000002
+Vdc: 12
+ts: 0.00040000000000000002
+Observation block type: Zero-Order Hold
+Observation sample time: ts = 0.00040000000000000002 s
+Root input: SpeedRef_rps
+Root outputs: sampled_Vcmd, sampled_MotorSpeed
+Allowed transformations: externalize the model-internal reference stimulus through discrete root input SpeedRef_rps; retain the existing 2*pi conversion; add observation-only Zero-Order Hold branches and sampled root outputs for Vcmd and MotorSpeed.
+Generation timestamp: 2026-10-13T16:36:30+09:00

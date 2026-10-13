@@ -1,0 +1,20 @@
+Protocol: v1.1 Frozen
+Source SHA before: 4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D
+Source SHA after: 4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D
+Derived SHA before: 0223B483023B87DE70FA440558AF651DF4B21DCD9B8C7095772A6CDFAB18D565
+Derived SHA after: 0223B483023B87DE70FA440558AF651DF4B21DCD9B8C7095772A6CDFAB18D565
+MATLAB release: 2023b
+Solver: ode4
+FixedStep: ts (ts = 0.00040000000000000002 s)
+Kps: 0.11497347265603371
+Kis: 2.041928874371159
+Kas: 17.760000000000002
+Vdc: 12
+ts: 0.00040000000000000002
+Vcmd internal comparison path: PI Speed Controller Saturation output (logged Vcmd)
+MotorSpeed internal comparison path: Transfer Fcn2 output through Gain4 = 1/(2*pi), logged motorspeed [rps]
+Stage B sampled outputs: sampled_Vcmd, sampled_MotorSpeed
+Scenario GATE-001: MTC-002 / IT-001; +2 rps, 0-1 s
+Scenario GATE-002: MTC-001 / IT-001; +16.75 rps, 0-1 s
+Scenario GATE-003: MTC-004 / IT-001; +15 rps [0,2 s), -15 rps [2,4 s]
+Execution timestamp: 2026-10-13T16:56:16+09:00

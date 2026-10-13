@@ -1,0 +1,7 @@
+ScenarioID,Stage,Signal,Status,SampleCountLeft,SampleCountRight,SampleCountExact,TimeVectorExact,MaxAbsDiff,RmsDiff,DifferingSampleCount,FirstDifferingIndex,FirstDifferingTime_s,Notes
+GATE-001,Stage A,Vcmd,PASS,2501,2501,1,1,0,0,0,NaN,NaN,
+GATE-001,Stage A,MotorSpeed,PASS,2501,2501,1,1,0,0,0,NaN,NaN,
+GATE-002,Stage A,Vcmd,PASS,2501,2501,1,1,0,0,0,NaN,NaN,
+GATE-002,Stage A,MotorSpeed,PASS,2501,2501,1,1,0,0,0,NaN,NaN,
+GATE-003,Stage A,Vcmd,PASS,10001,10001,1,1,0,0,0,NaN,NaN,
+GATE-003,Stage A,MotorSpeed,PASS,10001,10001,1,1,0,0,0,NaN,NaN,
