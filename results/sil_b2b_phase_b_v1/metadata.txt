@@ -1,0 +1,21 @@
+Protocol: v1.2 Frozen
+Phase: B Independent Evaluation
+MATLAB/Simulink: 2023b / 23.2
+Host/compiler: win64 / Microsoft Visual C++ 2022 (C) 17.0
+Solver/FixedStep/target: ode4 / ts / grt.tlc
+Kps/Kis/Kas/Vdc/ts: 0.11497347265603371 / 2.041928874371159 / 17.760000000000002 / 12 / 0.00040000000000000002
+Candidate/independent: 18 / 15
+Manual/AI independent: 6 / 9
+PASS/FAIL/EXECUTION_ERROR: 15/0/0
+Tolerance formula: 64 * eps(max(1, abs(Model), abs(SIL)))
+Total tolerance-exceeding samples: 0
+Exact-equality executions: 15
+Source model: C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\model\AS2308_MIL_Baseline_v3.slx
+Source SHA before/after: 4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D / 4A7FDC070506CA641ACBD2C3EFEA2FEF71DDCC150CA3FC1F20F191B8B998ED4D
+Derived model: C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\model\verification\AS2308_SIL_B2B_Verification_v1.slx
+Derived SHA before/after: 0223B483023B87DE70FA440558AF651DF4B21DCD9B8C7095772A6CDFAB18D565 / 0223B483023B87DE70FA440558AF651DF4B21DCD9B8C7095772A6CDFAB18D565
+Integrity exact match: 1
+Build root: C:\Users\kimdaeyoung\Desktop\AS2308_AI_Verification\build\sil_b2b_phase_b_v1
+Total elapsed s: 125.0588632
+Continuous internal logging was disabled; required observations were discrete root outputs.
+Execution timestamp: 2026-10-13T17:53:36+09:00

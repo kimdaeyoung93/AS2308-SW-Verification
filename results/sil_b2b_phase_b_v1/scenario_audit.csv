@@ -1,0 +1,19 @@
+CandidateOrder,Suite,ExecutionID,DisplayID,InputDescription,ScenarioIdentity,PhaseAIDExcluded,PhaseAIdentityExcluded,DuplicateRemainingIdentity,Classification,ExclusionReason
+1,Manual,MANUAL:MTC-001/IT-001,MTC-001 / IT-001,"values=[16.75] rps; segment=1 s; total=1 s","segments=[16.75]|transitions=[]|duration=1|initial=INITIALIZED_AT_REST",1,1,0,SUPPLEMENTAL / NON-INDEPENDENT,PHASE_A_ID_AND_IDENTITY
+2,Manual,MANUAL:MTC-001/IT-002,MTC-001 / IT-002,"values=[-16.75] rps; segment=1 s; total=1 s","segments=[-16.75]|transitions=[]|duration=1|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+3,Manual,MANUAL:MTC-002/IT-001,MTC-002 / IT-001,"values=[2] rps; segment=1 s; total=1 s","segments=[2]|transitions=[]|duration=1|initial=INITIALIZED_AT_REST",1,1,0,SUPPLEMENTAL / NON-INDEPENDENT,PHASE_A_ID_AND_IDENTITY
+4,Manual,MANUAL:MTC-002/IT-002,MTC-002 / IT-002,"values=[-2] rps; segment=1 s; total=1 s","segments=[-2]|transitions=[]|duration=1|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+5,Manual,MANUAL:MTC-003/IT-001,MTC-003 / IT-001,"values=[15] rps; segment=1 s; total=1 s","segments=[15]|transitions=[]|duration=1|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+6,Manual,MANUAL:MTC-003/IT-002,MTC-003 / IT-002,"values=[-15] rps; segment=1 s; total=1 s","segments=[-15]|transitions=[]|duration=1|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+7,Manual,MANUAL:MTC-004/IT-001,MTC-004 / IT-001,"values=[15,-15] rps; segment=2 s; total=4 s","segments=[15,-15]|transitions=[2]|duration=4|initial=INITIALIZED_AT_REST",1,1,0,SUPPLEMENTAL / NON-INDEPENDENT,PHASE_A_ID_AND_IDENTITY
+8,Manual,MANUAL:MTC-004/IT-002,MTC-004 / IT-002,"values=[-15,15] rps; segment=2 s; total=4 s","segments=[-15,15]|transitions=[2]|duration=4|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+9,Manual,MANUAL:MTC-005/IT-001,MTC-005 / IT-001,"values=[15,-15,15,-15,15,-15] rps; segment=2 s; total=12 s; terminal wrap sample excluded","segments=[15,-15,15,-15,15,-15]|transitions=[2,4,6,8,10]|duration=12|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+10,AI,AI:TC-DIR-001,TC-DIR-001,"values=[5] rps; segment=2 s; total=2 s","segments=[5]|transitions=[]|duration=2|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+11,AI,AI:TC-DIR-002,TC-DIR-002,"values=[-5] rps; segment=2 s; total=2 s","segments=[-5]|transitions=[]|duration=2|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+12,AI,AI:TC-REV-001,TC-REV-001,"values=[5,-5] rps; segment=2 s; total=4 s; terminal wrap sample excluded","segments=[5,-5]|transitions=[2]|duration=4|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+13,AI,AI:TC-REV-003,TC-REV-003,"values=[0.5,-0.5] rps; segment=2 s; total=4 s; terminal wrap sample excluded","segments=[0.5,-0.5]|transitions=[2]|duration=4|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+14,AI,AI:TC-TRK-003,TC-TRK-003,"values=[0.10000000000000001] rps; segment=2 s; total=2 s","segments=[0.10000000000000001]|transitions=[]|duration=2|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+15,AI,AI:TC-TRK-005,TC-TRK-005,"values=[19.899999999999999] rps; segment=2 s; total=2 s","segments=[19.899999999999999]|transitions=[]|duration=2|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+16,AI,AI:TC-TRK-007,TC-TRK-007,"values=[2,10] rps; segment=2 s; total=4 s; terminal wrap sample excluded","segments=[2,10]|transitions=[2]|duration=4|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+17,AI,AI:TC-VOLT-004,TC-VOLT-004,"values=[-19.899999999999999] rps; segment=2 s; total=2 s","segments=[-19.899999999999999]|transitions=[]|duration=2|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
+18,AI,AI:TC-VOLT-006,TC-VOLT-006,"values=[10,-10,10,-10] rps; segment=2 s; total=8 s; terminal wrap sample excluded","segments=[10,-10,10,-10]|transitions=[2,4,6]|duration=8|initial=INITIALIZED_AT_REST",0,0,0,INDEPENDENT,NONE
