@@ -24,3 +24,5 @@ results/coverage/AS2308_MIL_Baseline_v3_cvdata*.cvt
 
 __pycache__/
 *.pyc
+
+build/
