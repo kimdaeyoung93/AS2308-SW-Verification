@@ -1,0 +1,2 @@
+run_id,healthy_execution_count,mutation_execution_count,total_execution_count,healthy_elapsed_time_s,mutation_elapsed_time_s,total_simulation_elapsed_time_s,average_execution_time_s,healthy_fail_count,healthy_inconclusive_count,execution_error_count,automatic_retry_count,completion_status
+SCALABILITY_20261014_181424_487,100,600,700,22.8507224,127.7551613,150.6058837,0.215151262428571,0,0,0,0,COMPLETED

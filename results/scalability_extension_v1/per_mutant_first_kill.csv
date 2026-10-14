@@ -1,0 +1,7 @@
+﻿mutation_id,killed_within_100,first_kill_test_index,first_killing_candidate,first_kill_budget,total_kill_cells
+MUT-001,true,2,EXT-B04-TC-008,10,27
+MUT-002,true,2,EXT-B04-TC-008,10,44
+MUT-003,true,2,EXT-B04-TC-008,10,28
+MUT-004,true,5,EXT-B01-CAND-025,10,9
+MUT-005,true,5,EXT-B01-CAND-025,10,9
+MUT-006,true,2,EXT-B04-TC-008,10,39

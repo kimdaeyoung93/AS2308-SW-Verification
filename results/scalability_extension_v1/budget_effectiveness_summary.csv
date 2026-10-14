@@ -1,0 +1,6 @@
+﻿budget,test_count,healthy_pass_count,healthy_pass_rate_percent,healthy_fail_count,healthy_inconclusive_precondition_count,healthy_execution_error_count,mutation_eligible_test_count,valid_mutants,mutants_killed,mutation_score_percent,kill_cells,cumulative_kill_cells,marginal_kill_cell_gain,total_test_mutant_cells,kill_density_percent,inconclusive_mutation_cells,mutation_execution_error_cells,zero_kill_test_count,no_new_mutant_test_count,healthy_elapsed_time_s,mutation_elapsed_time_s,total_elapsed_time_s,completed_execution_count,average_time_per_completed_execution_s,all_killable_mutants_first_killed_index,all_killable_mutants_first_killed_budget
+10,10,10,100.0,0,0,0,10,6,6,100.0,12,12,12,60,20.0,7,0,4,4,1.8828468,15.2491281,17.1319749,70,0.24474249857142857,5,10
+25,25,25,100.0,0,0,0,25,6,6,100.0,36,36,24,150,24.0,21,0,8,15,4.7165403999999995,33.0692195,37.7857599,175,0.215918628,5,10
+50,50,50,100.0,0,0,0,50,6,6,100.0,77,77,41,300,25.666666666666668,41,0,13,35,9.7521442,62.7155873,72.4677315,350,0.20705066142857143,5,10
+75,75,75,100.0,0,0,0,75,6,6,100.0,115,115,38,450,25.555555555555557,64,0,19,54,15.140028299999999,92.1551454,107.29517369999999,525,0.20437175942857141,5,10
+100,100,100,100.0,0,0,0,100,6,6,100.0,156,156,41,600,26.0,97,0,27,71,20.3724845,122.2984807,142.6709652,700,0.20381566457142858,5,10
