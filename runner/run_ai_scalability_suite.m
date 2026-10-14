@@ -451,9 +451,9 @@ function [summaryRow, detailRows] = localEvaluateCandidate( ...
             required(end + 1, 1) = detail.direction_result; %#ok<AGROW>
         elseif specRow.requirement_id == "REQ-TRK-001"
             if mutationID == "BASELINE"
-                persistent = localPersistentTerminalClamp( ...
+                isPersistentClamp = localPersistentTerminalClamp( ...
                     t, raw, vcmd, parameters.Vdc, specRow.evaluation_window_s);
-                if persistent
+                if isPersistentClamp
                     frozen = "PRECONDITION_NOT_MET";
                 else
                     frozen = "APPLICABLE";
@@ -562,12 +562,12 @@ function applicability = localFrozenApplicability(segments, candidateID, segment
         applicability == "PRECONDITION_NOT_MET");
 end
 
-function persistent = localPersistentTerminalClamp(time, raw, vcmd, limit, window)
+function isPersistentClamp = localPersistentTerminalClamp(time, raw, vcmd, limit, window)
     rows = time >= time(end) - window;
     tolerance = 64 * eps(max([1; abs(vcmd(rows)); limit]));
     positive = raw(rows) > limit & abs(vcmd(rows) - limit) <= tolerance;
     negative = raw(rows) < -limit & abs(vcmd(rows) + limit) <= tolerance;
-    persistent = all(positive | negative);
+    isPersistentClamp = all(positive | negative);
 end
 
 function localVerifyWaveform(time, reference, values, duration, totalDuration)

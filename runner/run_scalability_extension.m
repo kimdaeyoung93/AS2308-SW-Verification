@@ -18,8 +18,8 @@ function result = run_scalability_extension(varargin)
         'mutation_results',table(),'kill_matrix',table());
 
     if ~execute
-        % Each preflight is intentionally called independently. Missing Python
-        % artifacts or healthy evidence are reported as hard dependencies.
+        % Each preflight is intentionally called independently. Healthy
+        % evidence is created later by the Execute=true workflow.
         failures=strings(0,1);
         try
             run_ai_scalability_suite('Execute',false,'WriteResults',false,'RunID',runID);
@@ -27,7 +27,9 @@ function result = run_scalability_extension(varargin)
             failures(end+1)=string(ME.identifier)+": "+string(ME.message); %#ok<AGROW>
         end
         try
-            run_ai_scalability_mutation_analysis('Execute',false,'WriteResults',false,'RunID',runID);
+            run_ai_scalability_mutation_analysis('Execute',false, ...
+                'RequireHealthyEvidence',false, ...
+                'WriteResults',false,'RunID',runID);
         catch ME
             failures(end+1)=string(ME.identifier)+": "+string(ME.message); %#ok<AGROW>
         end
