@@ -105,7 +105,7 @@ function localWriteMetadata(repo,outDir,runID,started,ended,status)
     poolHashes=unique(string(poolTable.frozen_pool_sha256));
     assert(numel(poolHashes)==1 && strlength(poolHashes)==64, ...
         'run_scalability_extension:PoolHash','Frozen pool hash is inconsistent.');
-    lines=["protocol_version=v1.0 Frozen";"git_commit="+strtrim(string(gitText)); ...
+    lines=["protocol_version="+localProtocolVersion();"git_commit="+strtrim(string(gitText)); ...
         "branch="+strtrim(string(branchText));"model_hash="+localHash(model); ...
         "mutation_set_hash="+localHash(mutation);"frozen_pool_hash="+poolHashes; ...
         "frozen_pool_file_hash="+localHash(pool); ...
@@ -121,6 +121,10 @@ function localWriteMetadata(repo,outDir,runID,started,ended,status)
     for k=1:numel(lines)
         fprintf(fid,'%s\n',lines(k));
     end
+end
+
+function value=localProtocolVersion()
+    value="v1.1 Amended";
 end
 
 function h=localHash(path)
