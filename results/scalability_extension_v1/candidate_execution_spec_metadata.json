@@ -1,0 +1,12 @@
+{
+  "status": "RESOLVED_EXECUTION_SPEC_READY",
+  "candidate_count": 100,
+  "segment_duration_s": 2.0,
+  "terminal_evaluation_window_s": 0.05,
+  "sample_time_s": 0.0004,
+  "frozen_pool_sha256": "C53FDB14FC32D436284E0C2978A6628365F2148C29F6144939AF7D0C95272CCC",
+  "input_file": "results\\scalability_extension_v1\\candidate_pool_frozen.csv",
+  "input_file_sha256": "97BF60FFA5FD578FD1DF1C728A5D3AA9F06523E8B27138083000F747A8713E76",
+  "output_file": "results\\scalability_extension_v1\\candidate_execution_spec_resolved.csv",
+  "output_file_sha256": "336182F4553BCE735622CC01F6A2D5A8A671EEB1B4FBBE40FEE6FFAB4B04B1AA"
+}

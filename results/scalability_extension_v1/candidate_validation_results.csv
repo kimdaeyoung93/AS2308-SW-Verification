@@ -1,0 +1,176 @@
+﻿batch_id,original_candidate_id,extension_candidate_id,schema_status,semantic_status,validation_status,rejection_reason,requirement_id,test_scope,test_design_technique,input_values
+B01,CAND-001,EXT-B01-CAND-001,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[1.0]
+B01,CAND-002,EXT-B01-CAND-002,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[8.0]
+B01,CAND-003,EXT-B01-CAND-003,VALID,VALID,VALID,,REQ-TRK-001,stress,Boundary Value Analysis,[19.9]
+B01,CAND-004,EXT-B01-CAND-004,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[-1.0]
+B01,CAND-005,EXT-B01-CAND-005,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[-8.0]
+B01,CAND-006,EXT-B01-CAND-006,VALID,VALID,VALID,,REQ-TRK-001,stress,Boundary Value Analysis,[-19.9]
+B01,CAND-007,EXT-B01-CAND-007,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[0.0]
+B01,CAND-008,EXT-B01-CAND-008,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[0.5]
+B01,CAND-009,EXT-B01-CAND-009,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[10.0]
+B01,CAND-010,EXT-B01-CAND-010,VALID,VALID,VALID,,REQ-DIR-001,stress,Boundary Value Analysis,[19.9]
+B01,CAND-011,EXT-B01-CAND-011,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[-0.5]
+B01,CAND-012,EXT-B01-CAND-012,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[-10.0]
+B01,CAND-013,EXT-B01-CAND-013,VALID,VALID,VALID,,REQ-DIR-001,stress,Boundary Value Analysis,[-19.9]
+B01,CAND-014,EXT-B01-CAND-014,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[6.0,6.0,-6.0,-6.0]"
+B01,CAND-015,EXT-B01-CAND-015,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[-6.0,-6.0,6.0,6.0]"
+B01,CAND-016,EXT-B01-CAND-016,VALID,VALID,VALID,,REQ-REV-001,stress,Scenario-Based,"[1.0,1.0,-19.0,-19.0]"
+B01,CAND-017,EXT-B01-CAND-017,VALID,VALID,VALID,,REQ-REV-001,stress,Scenario-Based,"[-1.0,-1.0,19.0,19.0]"
+B01,CAND-018,EXT-B01-CAND-018,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[5.0,5.0,0.0,0.0,-5.0,-5.0]"
+B01,CAND-019,EXT-B01-CAND-019,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[-5.0,-5.0,0.0,0.0,5.0,5.0]"
+B01,CAND-020,EXT-B01-CAND-020,VALID,VALID,VALID,,REQ-REV-001,stress,Scenario-Based,"[4.0,4.0,-4.0,-4.0,4.0,4.0]"
+B01,CAND-021,EXT-B01-CAND-021,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[0.0]
+B01,CAND-022,EXT-B01-CAND-022,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[10.0]
+B01,CAND-023,EXT-B01-CAND-023,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[-10.0]
+B01,CAND-024,EXT-B01-CAND-024,VALID,VALID,VALID,,REQ-VOLT-001,stress,Scenario-Based,"[19.9,19.9,-19.9,-19.9]"
+B01,CAND-025,EXT-B01-CAND-025,VALID,VALID,VALID,,REQ-VOLT-001,stress,State Transition,"[-19.9,-19.9,19.9,19.9]"
+B02,TC-001,EXT-B02-TC-001,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[0.0]
+B02,TC-002,EXT-B02-TC-002,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[5.0]
+B02,TC-003,EXT-B02-TC-003,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[-5.0]
+B02,TC-004,EXT-B02-TC-004,VALID,VALID,VALID,,REQ-VOLT-001,stress,Boundary Value Analysis,[19.9]
+B02,TC-005,EXT-B02-TC-005,VALID,VALID,VALID,,REQ-VOLT-001,stress,Boundary Value Analysis,[-19.9]
+B02,TC-006,EXT-B02-TC-006,VALID,REJECTED,REJECTED,Possible unsupported product performance threshold,REQ-VOLT-001,stress,Scenario-Based,"[6.0,-6.0]"
+B02,TC-007,EXT-B02-TC-007,VALID,REJECTED,REJECTED,Possible unsupported product performance threshold,REQ-VOLT-001,stress,Scenario-Based,"[-6.0,6.0]"
+B02,TC-008,EXT-B02-TC-008,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[0.1]
+B02,TC-009,EXT-B02-TC-009,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[-0.1]
+B02,TC-010,EXT-B02-TC-010,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[10.0]
+B02,TC-011,EXT-B02-TC-011,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[-10.0]
+B02,TC-012,EXT-B02-TC-012,VALID,VALID,VALID,,REQ-TRK-001,stress,Boundary Value Analysis,[19.9]
+B02,TC-013,EXT-B02-TC-013,VALID,VALID,VALID,,REQ-TRK-001,stress,Boundary Value Analysis,[-19.9]
+B02,TC-014,EXT-B02-TC-014,VALID,VALID,VALID,,REQ-TRK-001,nominal,Scenario-Based,"[0.0,4.0]"
+B02,TC-015,EXT-B02-TC-015,VALID,VALID,VALID,,REQ-TRK-001,nominal,Scenario-Based,"[0.0,-4.0]"
+B02,TC-016,EXT-B02-TC-016,VALID,VALID,VALID,,REQ-TRK-001,stress,State Transition,"[2.0,8.0,16.0]"
+B02,TC-017,EXT-B02-TC-017,VALID,VALID,VALID,,REQ-TRK-001,stress,State Transition,"[-2.0,-8.0,-16.0]"
+B02,TC-018,EXT-B02-TC-018,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[0.1]
+B02,TC-019,EXT-B02-TC-019,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[-0.1]
+B02,TC-020,EXT-B02-TC-020,VALID,VALID,VALID,,REQ-DIR-001,stress,Boundary Value Analysis,[19.9]
+B02,TC-021,EXT-B02-TC-021,VALID,VALID,VALID,,REQ-DIR-001,stress,Boundary Value Analysis,[-19.9]
+B02,TC-022,EXT-B02-TC-022,VALID,VALID,VALID,,REQ-DIR-001,stress,State Transition,"[3.0,-3.0,3.0]"
+B02,TC-023,EXT-B02-TC-023,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[8.0,-8.0]"
+B02,TC-024,EXT-B02-TC-024,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[-8.0,8.0]"
+B02,TC-025,EXT-B02-TC-025,VALID,REJECTED,REJECTED,Possible unsupported product performance threshold,REQ-REV-001,stress,Scenario-Based,"[5.0,-5.0,5.0,-5.0]"
+B03,TC-001,EXT-B03-TC-001,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[0.1]
+B03,TC-002,EXT-B03-TC-002,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[5.0]
+B03,TC-003,EXT-B03-TC-003,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[-5.0]
+B03,TC-004,EXT-B03-TC-004,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[19.9]
+B03,TC-005,EXT-B03-TC-005,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[-19.9]
+B03,TC-006,EXT-B03-TC-006,VALID,VALID,VALID,,REQ-TRK-001,nominal,Scenario-Based,"[1.0,10.0]"
+B03,TC-007,EXT-B03-TC-007,VALID,VALID,VALID,,REQ-TRK-001,nominal,Scenario-Based,"[-1.0,-10.0]"
+B03,TC-008,EXT-B03-TC-008,VALID,VALID,VALID,,REQ-TRK-001,nominal,State Transition,"[-8.0,0.0,8.0]"
+B03,TC-009,EXT-B03-TC-009,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[0.1]
+B03,TC-010,EXT-B03-TC-010,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[10.0]
+B03,TC-011,EXT-B03-TC-011,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[-0.1]
+B03,TC-012,EXT-B03-TC-012,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[-10.0]
+B03,TC-013,EXT-B03-TC-013,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[19.9]
+B03,TC-014,EXT-B03-TC-014,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[-19.9]
+B03,TC-015,EXT-B03-TC-015,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[5.0,-5.0]"
+B03,TC-016,EXT-B03-TC-016,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[-5.0,5.0]"
+B03,TC-017,EXT-B03-TC-017,VALID,VALID,VALID,,REQ-REV-001,nominal,Scenario-Based,"[2.0,-10.0]"
+B03,TC-018,EXT-B03-TC-018,VALID,VALID,VALID,,REQ-REV-001,nominal,Scenario-Based,"[-2.0,10.0]"
+B03,TC-019,EXT-B03-TC-019,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[8.0,0.0,-8.0]"
+B03,TC-020,EXT-B03-TC-020,VALID,VALID,VALID,,REQ-REV-001,stress,Scenario-Based,"[6.0,-6.0,6.0,-6.0]"
+B03,TC-021,EXT-B03-TC-021,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[10.0]
+B03,TC-022,EXT-B03-TC-022,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[-10.0]
+B03,TC-023,EXT-B03-TC-023,VALID,VALID,VALID,,REQ-VOLT-001,stress,Scenario-Based,"[19.9,-19.9]"
+B03,TC-024,EXT-B03-TC-024,VALID,VALID,VALID,,REQ-VOLT-001,stress,Boundary Value Analysis,[20.0]
+B03,TC-025,EXT-B03-TC-025,VALID,VALID,VALID,,REQ-VOLT-001,stress,Boundary Value Analysis,[-20.0]
+B04,TC-001,EXT-B04-TC-001,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[1.0]
+B04,TC-002,EXT-B04-TC-002,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[-1.0]
+B04,TC-003,EXT-B04-TC-003,VALID,VALID,VALID,,REQ-VOLT-001,stress,Boundary Value Analysis,[19.9]
+B04,TC-004,EXT-B04-TC-004,VALID,VALID,VALID,,REQ-VOLT-001,stress,Boundary Value Analysis,[-19.9]
+B04,TC-005,EXT-B04-TC-005,VALID,VALID,VALID,,REQ-VOLT-001,nominal,State Transition,"[5.0,-5.0]"
+B04,TC-006,EXT-B04-TC-006,VALID,VALID,VALID,,REQ-VOLT-001,nominal,State Transition,"[-5.0,5.0]"
+B04,TC-007,EXT-B04-TC-007,VALID,VALID,VALID,,REQ-VOLT-001,stress,Scenario-Based,"[19.9,-19.9]"
+B04,TC-008,EXT-B04-TC-008,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[0.5]
+B04,TC-009,EXT-B04-TC-009,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[-0.5]
+B04,TC-010,EXT-B04-TC-010,VALID,VALID,VALID,,REQ-TRK-001,nominal,Scenario-Based,[5.0]
+B04,TC-011,EXT-B04-TC-011,VALID,VALID,VALID,,REQ-TRK-001,nominal,Scenario-Based,[-5.0]
+B04,TC-012,EXT-B04-TC-012,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[0.0]
+B04,TC-013,EXT-B04-TC-013,VALID,VALID,VALID,,REQ-TRK-001,stress,Boundary Value Analysis,[19.9]
+B04,TC-014,EXT-B04-TC-014,VALID,VALID,VALID,,REQ-TRK-001,stress,Boundary Value Analysis,[-19.9]
+B04,TC-015,EXT-B04-TC-015,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[0.1]
+B04,TC-016,EXT-B04-TC-016,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[-0.1]
+B04,TC-017,EXT-B04-TC-017,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[8.0]
+B04,TC-018,EXT-B04-TC-018,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[-8.0]
+B04,TC-019,EXT-B04-TC-019,VALID,VALID,VALID,,REQ-DIR-001,stress,Scenario-Based,"[19.9,-19.9]"
+B04,TC-020,EXT-B04-TC-020,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[0.5,-0.5]"
+B04,TC-021,EXT-B04-TC-021,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[-0.5,0.5]"
+B04,TC-022,EXT-B04-TC-022,VALID,VALID,VALID,,REQ-REV-001,nominal,Scenario-Based,"[8.0,-8.0]"
+B04,TC-023,EXT-B04-TC-023,VALID,VALID,VALID,,REQ-REV-001,nominal,Scenario-Based,"[-8.0,8.0]"
+B04,TC-024,EXT-B04-TC-024,VALID,VALID,VALID,,REQ-REV-001,stress,Boundary Value Analysis,"[19.9,-19.9]"
+B04,TC-025,EXT-B04-TC-025,VALID,VALID,VALID,,REQ-REV-001,stress,Boundary Value Analysis,"[-19.9,19.9]"
+B05,TC-001,EXT-B05-TC-001,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[1.0]
+B05,TC-002,EXT-B05-TC-002,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[8.0]
+B05,TC-003,EXT-B05-TC-003,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[-8.0]
+B05,TC-004,EXT-B05-TC-004,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[19.5]
+B05,TC-005,EXT-B05-TC-005,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[-19.5]
+B05,TC-006,EXT-B05-TC-006,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[0.0]
+B05,TC-007,EXT-B05-TC-007,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[0.1]
+B05,TC-008,EXT-B05-TC-008,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[-0.1]
+B05,TC-009,EXT-B05-TC-009,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[12.0]
+B05,TC-010,EXT-B05-TC-010,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[-12.0]
+B05,TC-011,EXT-B05-TC-011,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[19.9]
+B05,TC-012,EXT-B05-TC-012,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[-19.9]
+B05,TC-013,EXT-B05-TC-013,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[6.0,-6.0]"
+B05,TC-014,EXT-B05-TC-014,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[-6.0,6.0]"
+B05,TC-015,EXT-B05-TC-015,VALID,VALID,VALID,,REQ-REV-001,nominal,Scenario-Based,"[4.0,-12.0]"
+B05,TC-016,EXT-B05-TC-016,VALID,VALID,VALID,,REQ-REV-001,nominal,Scenario-Based,"[-4.0,12.0]"
+B05,TC-017,EXT-B05-TC-017,VALID,VALID,VALID,,REQ-REV-001,nominal,Boundary Value Analysis,"[19.0,-19.0]"
+B05,TC-018,EXT-B05-TC-018,VALID,VALID,VALID,,REQ-REV-001,nominal,Boundary Value Analysis,"[-19.0,19.0]"
+B05,TC-019,EXT-B05-TC-019,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[5.0,0.0,-5.0]"
+B05,TC-020,EXT-B05-TC-020,VALID,VALID,VALID,,REQ-REV-001,stress,Scenario-Based,"[3.0,-3.0,3.0,-3.0]"
+B05,TC-021,EXT-B05-TC-021,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[1.0]
+B05,TC-022,EXT-B05-TC-022,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[-1.0]
+B05,TC-023,EXT-B05-TC-023,VALID,VALID,VALID,,REQ-VOLT-001,stress,Boundary Value Analysis,[20.0]
+B05,TC-024,EXT-B05-TC-024,VALID,VALID,VALID,,REQ-VOLT-001,stress,Boundary Value Analysis,[-20.0]
+B05,TC-025,EXT-B05-TC-025,VALID,VALID,VALID,,REQ-VOLT-001,stress,Scenario-Based,"[15.0,-15.0,15.0,-15.0]"
+B06,TC-001,EXT-B06-TC-001,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[0.0]
+B06,TC-002,EXT-B06-TC-002,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Boundary Value Analysis,[0.1]
+B06,TC-003,EXT-B06-TC-003,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Boundary Value Analysis,[-0.1]
+B06,TC-004,EXT-B06-TC-004,VALID,VALID,VALID,,REQ-VOLT-001,nominal,State Transition,"[8.0,-8.0]"
+B06,TC-005,EXT-B06-TC-005,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Boundary Value Analysis,[19.99]
+B06,TC-006,EXT-B06-TC-006,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Boundary Value Analysis,[-19.99]
+B06,TC-007,EXT-B06-TC-007,VALID,VALID,VALID,,REQ-VOLT-001,stress,Scenario-Based,"[19.9,-19.9,0.0]"
+B06,TC-008,EXT-B06-TC-008,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[0.5]
+B06,TC-009,EXT-B06-TC-009,VALID,VALID,VALID,,REQ-TRK-001,nominal,Scenario-Based,[5.0]
+B06,TC-010,EXT-B06-TC-010,VALID,VALID,VALID,,REQ-TRK-001,nominal,Scenario-Based,[-5.0]
+B06,TC-011,EXT-B06-TC-011,VALID,VALID,VALID,,REQ-TRK-001,stress,Boundary Value Analysis,[19.5]
+B06,TC-012,EXT-B06-TC-012,VALID,VALID,VALID,,REQ-TRK-001,stress,Boundary Value Analysis,[-19.5]
+B06,TC-013,EXT-B06-TC-013,VALID,VALID,VALID,,REQ-TRK-001,nominal,State Transition,"[3.0,-3.0]"
+B06,TC-014,EXT-B06-TC-014,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[0.1]
+B06,TC-015,EXT-B06-TC-015,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[-0.1]
+B06,TC-016,EXT-B06-TC-016,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[6.0]
+B06,TC-017,EXT-B06-TC-017,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[-6.0]
+B06,TC-018,EXT-B06-TC-018,VALID,VALID,VALID,,REQ-DIR-001,stress,Boundary Value Analysis,[19.9]
+B06,TC-019,EXT-B06-TC-019,VALID,VALID,VALID,,REQ-DIR-001,stress,Boundary Value Analysis,[-19.9]
+B06,TC-020,EXT-B06-TC-020,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[4.0,-4.0]"
+B06,TC-021,EXT-B06-TC-021,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[-4.0,4.0]"
+B06,TC-022,EXT-B06-TC-022,VALID,VALID,VALID,,REQ-REV-001,nominal,Boundary Value Analysis,"[0.5,-0.5]"
+B06,TC-023,EXT-B06-TC-023,VALID,VALID,VALID,,REQ-REV-001,nominal,Boundary Value Analysis,"[-0.5,0.5]"
+B06,TC-024,EXT-B06-TC-024,VALID,VALID,VALID,,REQ-REV-001,stress,Scenario-Based,"[15.0,-15.0]"
+B06,TC-025,EXT-B06-TC-025,VALID,VALID,VALID,,REQ-REV-001,stress,Scenario-Based,"[10.0,-10.0,10.0]"
+B07,TC-001,EXT-B07-TC-001,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[1.0]
+B07,TC-002,EXT-B07-TC-002,VALID,VALID,VALID,,REQ-DIR-001,nominal,Equivalence Partitioning,[-1.0]
+B07,TC-003,EXT-B07-TC-003,VALID,VALID,VALID,,REQ-DIR-001,nominal,Scenario-Based,[10.0]
+B07,TC-004,EXT-B07-TC-004,VALID,VALID,VALID,,REQ-DIR-001,nominal,Scenario-Based,[-10.0]
+B07,TC-005,EXT-B07-TC-005,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[19.9]
+B07,TC-006,EXT-B07-TC-006,VALID,VALID,VALID,,REQ-DIR-001,nominal,Boundary Value Analysis,[-19.9]
+B07,TC-007,EXT-B07-TC-007,VALID,VALID,VALID,,REQ-TRK-001,nominal,Scenario-Based,[2.0]
+B07,TC-008,EXT-B07-TC-008,VALID,VALID,VALID,,REQ-TRK-001,nominal,Scenario-Based,[-2.0]
+B07,TC-009,EXT-B07-TC-009,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[8.0]
+B07,TC-010,EXT-B07-TC-010,VALID,VALID,VALID,,REQ-TRK-001,nominal,Equivalence Partitioning,[-8.0]
+B07,TC-011,EXT-B07-TC-011,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[19.5]
+B07,TC-012,EXT-B07-TC-012,VALID,VALID,VALID,,REQ-TRK-001,nominal,Boundary Value Analysis,[-19.5]
+B07,TC-013,EXT-B07-TC-013,VALID,VALID,VALID,,REQ-TRK-001,stress,Boundary Value Analysis,[20.0]
+B07,TC-014,EXT-B07-TC-014,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[1.0]
+B07,TC-015,EXT-B07-TC-015,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Equivalence Partitioning,[-1.0]
+B07,TC-016,EXT-B07-TC-016,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Scenario-Based,"[8.0,-8.0]"
+B07,TC-017,EXT-B07-TC-017,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Scenario-Based,"[-8.0,8.0]"
+B07,TC-018,EXT-B07-TC-018,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Boundary Value Analysis,[19.9]
+B07,TC-019,EXT-B07-TC-019,VALID,VALID,VALID,,REQ-VOLT-001,nominal,Boundary Value Analysis,[-19.9]
+B07,TC-020,EXT-B07-TC-020,VALID,VALID,VALID,,REQ-VOLT-001,stress,Boundary Value Analysis,[25.0]
+B07,TC-021,EXT-B07-TC-021,VALID,VALID,VALID,,REQ-VOLT-001,stress,Boundary Value Analysis,[-25.0]
+B07,TC-022,EXT-B07-TC-022,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[5.0,-5.0]"
+B07,TC-023,EXT-B07-TC-023,VALID,VALID,VALID,,REQ-REV-001,nominal,State Transition,"[-5.0,5.0]"
+B07,TC-024,EXT-B07-TC-024,VALID,VALID,VALID,,REQ-REV-001,nominal,Scenario-Based,"[15.0,-15.0]"
+B07,TC-025,EXT-B07-TC-025,VALID,VALID,VALID,,REQ-REV-001,nominal,Scenario-Based,"[-15.0,15.0]"

@@ -1,0 +1,2 @@
+﻿status,batch_ids,batch_count,raw_candidate_count,schema_valid_count,semantic_valid_count,duplicate_count,eligible_unique_executable_count,frozen_candidate_count,fallback_b06_allowed,capacity_b07_allowed,frozen_pool_sha256,ordering_rule_version
+FROZEN_POOL_READY,"B01,B02,B03,B04,B05,B06,B07",7,175,175,172,68,104,100,false,false,C53FDB14FC32D436284E0C2978A6628365F2148C29F6144939AF7D0C95272CCC,requirement-round-robin_sha256-v1

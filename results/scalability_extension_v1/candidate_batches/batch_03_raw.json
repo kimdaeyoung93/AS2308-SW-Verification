@@ -1,0 +1,395 @@
+{
+  "batch_id": "B03",
+  "candidate_count": 25,
+  "candidates": [
+    {
+      "original_candidate_id": "TC-001",
+      "candidate_id": "TC-001",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify stable tracking of a small positive constant speed reference.",
+      "precondition": "Initialize the MIL model at rest with no persistent actuator saturation; maintain SpeedRef at the specified constant value for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        0.1
+      ],
+      "expected_behavior": "MotorSpeed shall converge stably to the constant 0.1 rps reference.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises a small non-zero positive reference near zero while remaining within the nominal domain.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-002",
+      "candidate_id": "TC-002",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify stable tracking of a moderate positive constant speed reference.",
+      "precondition": "Initialize the MIL model at rest with no persistent actuator saturation; maintain SpeedRef at the specified constant value for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        5.0
+      ],
+      "expected_behavior": "MotorSpeed shall converge stably to the constant 5.0 rps reference.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Represents the nominal positive constant-reference operating partition.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-003",
+      "candidate_id": "TC-003",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify stable tracking of a moderate negative constant speed reference.",
+      "precondition": "Initialize the MIL model at rest with no persistent actuator saturation; maintain SpeedRef at the specified constant value for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -5.0
+      ],
+      "expected_behavior": "MotorSpeed shall converge stably to the constant -5.0 rps reference.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Represents the nominal negative constant-reference operating partition.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-004",
+      "candidate_id": "TC-004",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify stable tracking near the positive edge of the nominal speed-reference domain.",
+      "precondition": "Initialize the MIL model at rest with no persistent actuator saturation; maintain SpeedRef at the specified constant value for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        19.9
+      ],
+      "expected_behavior": "MotorSpeed shall converge stably to the constant 19.9 rps reference, provided persistent actuator saturation does not occur.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Uses a value just below the stated nominal-domain boundary.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-005",
+      "candidate_id": "TC-005",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify stable tracking near the negative edge of the nominal speed-reference domain.",
+      "precondition": "Initialize the MIL model at rest with no persistent actuator saturation; maintain SpeedRef at the specified constant value for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -19.9
+      ],
+      "expected_behavior": "MotorSpeed shall converge stably to the constant -19.9 rps reference, provided persistent actuator saturation does not occur.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Uses a value just above the stated negative nominal-domain boundary.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-006",
+      "candidate_id": "TC-006",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify stable tracking after changing from a low positive reference to a higher positive reference.",
+      "precondition": "Initialize the MIL model at rest with no persistent actuator saturation; apply each SpeedRef segment in sequence and maintain the final constant reference for the simulation interval.",
+      "input_type": "Piecewise-constant SpeedRef sequence",
+      "input_values": [
+        1.0,
+        10.0
+      ],
+      "expected_behavior": "Following the change, MotorSpeed shall converge stably to the final 10.0 rps reference, provided persistent actuator saturation does not occur.",
+      "test_design_technique": "Scenario-Based",
+      "rationale": "Checks tracking in a positive-reference scenario with a reference change.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-007",
+      "candidate_id": "TC-007",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify stable tracking after changing from a low negative reference to a higher-magnitude negative reference.",
+      "precondition": "Initialize the MIL model at rest with no persistent actuator saturation; apply each SpeedRef segment in sequence and maintain the final constant reference for the simulation interval.",
+      "input_type": "Piecewise-constant SpeedRef sequence",
+      "input_values": [
+        -1.0,
+        -10.0
+      ],
+      "expected_behavior": "Following the change, MotorSpeed shall converge stably to the final -10.0 rps reference, provided persistent actuator saturation does not occur.",
+      "test_design_technique": "Scenario-Based",
+      "rationale": "Checks tracking in a negative-reference scenario with a reference change.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-008",
+      "candidate_id": "TC-008",
+      "requirement_id": "REQ-TRK-001",
+      "test_objective": "Verify tracking of a reference that changes sign through zero before reaching a final positive value.",
+      "precondition": "Initialize the MIL model at rest with no persistent actuator saturation; apply the SpeedRef segments in sequence and maintain the final constant reference for observation.",
+      "input_type": "Piecewise-constant SpeedRef sequence",
+      "input_values": [
+        -8.0,
+        0.0,
+        8.0
+      ],
+      "expected_behavior": "MotorSpeed shall converge stably to the final constant 8.0 rps reference, provided persistent actuator saturation does not occur.",
+      "test_design_technique": "State Transition",
+      "rationale": "Exercises transitions through the zero-reference state before positive tracking.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-009",
+      "candidate_id": "TC-009",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify positive-reference directionality at a small positive speed.",
+      "precondition": "Initialize the MIL model at rest and maintain the non-zero positive SpeedRef for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        0.1
+      ],
+      "expected_behavior": "Steady-state MotorSpeed shall be positive, matching the sign of the positive SpeedRef.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Checks positive sign behavior close to zero.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-010",
+      "candidate_id": "TC-010",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify positive-reference directionality at a moderate speed.",
+      "precondition": "Initialize the MIL model at rest and maintain the non-zero positive SpeedRef for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        10.0
+      ],
+      "expected_behavior": "Steady-state MotorSpeed shall be positive, matching the sign of the positive SpeedRef.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Checks the representative positive-reference partition.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-011",
+      "candidate_id": "TC-011",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify negative-reference directionality at a small negative speed.",
+      "precondition": "Initialize the MIL model at rest and maintain the non-zero negative SpeedRef for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -0.1
+      ],
+      "expected_behavior": "Steady-state MotorSpeed shall be negative, matching the sign of the negative SpeedRef.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Checks negative sign behavior close to zero.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-012",
+      "candidate_id": "TC-012",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify negative-reference directionality at a moderate speed.",
+      "precondition": "Initialize the MIL model at rest and maintain the non-zero negative SpeedRef for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -10.0
+      ],
+      "expected_behavior": "Steady-state MotorSpeed shall be negative, matching the sign of the negative SpeedRef.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Checks the representative negative-reference partition.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-013",
+      "candidate_id": "TC-013",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify positive directionality near the nominal positive input boundary.",
+      "precondition": "Initialize the MIL model at rest and maintain the non-zero positive SpeedRef for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        19.9
+      ],
+      "expected_behavior": "Steady-state MotorSpeed shall be positive, matching the sign of the positive SpeedRef.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises positive directionality near the stated nominal-domain boundary.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-014",
+      "candidate_id": "TC-014",
+      "requirement_id": "REQ-DIR-001",
+      "test_objective": "Verify negative directionality near the nominal negative input boundary.",
+      "precondition": "Initialize the MIL model at rest and maintain the non-zero negative SpeedRef for the simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -19.9
+      ],
+      "expected_behavior": "Steady-state MotorSpeed shall be negative, matching the sign of the negative SpeedRef.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Exercises negative directionality near the stated nominal-domain boundary.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-015",
+      "candidate_id": "TC-015",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify reversal from positive steady operation to negative steady operation.",
+      "precondition": "Establish steady operation with the first positive SpeedRef segment, then apply the negative segment and observe the final state.",
+      "input_type": "Piecewise-constant SpeedRef sequence",
+      "input_values": [
+        5.0,
+        -5.0
+      ],
+      "expected_behavior": "MotorSpeed shall transition from the original positive direction to the negative reference direction and converge stably to the final negative reference.",
+      "test_design_technique": "State Transition",
+      "rationale": "Directly exercises the required positive-to-negative reversal sequence.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-016",
+      "candidate_id": "TC-016",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify reversal from negative steady operation to positive steady operation.",
+      "precondition": "Establish steady operation with the first negative SpeedRef segment, then apply the positive segment and observe the final state.",
+      "input_type": "Piecewise-constant SpeedRef sequence",
+      "input_values": [
+        -5.0,
+        5.0
+      ],
+      "expected_behavior": "MotorSpeed shall transition from the original negative direction to the positive reference direction and converge stably to the final positive reference.",
+      "test_design_technique": "State Transition",
+      "rationale": "Directly exercises the required negative-to-positive reversal sequence.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-017",
+      "candidate_id": "TC-017",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify a positive-to-negative reversal with different reference magnitudes.",
+      "precondition": "Establish steady operation with the first positive SpeedRef segment, then apply the negative segment and observe the final state.",
+      "input_type": "Piecewise-constant SpeedRef sequence",
+      "input_values": [
+        2.0,
+        -10.0
+      ],
+      "expected_behavior": "MotorSpeed shall transition from the original positive direction to the negative reference direction and converge stably to the final negative reference.",
+      "test_design_technique": "Scenario-Based",
+      "rationale": "Checks reversal when both direction and requested magnitude change.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-018",
+      "candidate_id": "TC-018",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify a negative-to-positive reversal with different reference magnitudes.",
+      "precondition": "Establish steady operation with the first negative SpeedRef segment, then apply the positive segment and observe the final state.",
+      "input_type": "Piecewise-constant SpeedRef sequence",
+      "input_values": [
+        -2.0,
+        10.0
+      ],
+      "expected_behavior": "MotorSpeed shall transition from the original negative direction to the positive reference direction and converge stably to the final positive reference.",
+      "test_design_technique": "Scenario-Based",
+      "rationale": "Checks reversal when both direction and requested magnitude change.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-019",
+      "candidate_id": "TC-019",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify reversal through an intermediate zero-speed reference.",
+      "precondition": "Establish steady operation with the first positive SpeedRef segment, apply zero, then apply the final negative segment and observe the final state.",
+      "input_type": "Piecewise-constant SpeedRef sequence",
+      "input_values": [
+        8.0,
+        0.0,
+        -8.0
+      ],
+      "expected_behavior": "MotorSpeed shall transition through the reversal sequence and converge stably to the final negative reference direction.",
+      "test_design_technique": "State Transition",
+      "rationale": "Exercises an explicit zero-reference intermediate state during reversal.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-020",
+      "candidate_id": "TC-020",
+      "requirement_id": "REQ-REV-001",
+      "test_objective": "Verify repeated bidirectional reversals.",
+      "precondition": "Establish each preceding steady state before applying the next SpeedRef segment and observe the final state.",
+      "input_type": "Piecewise-constant SpeedRef sequence",
+      "input_values": [
+        6.0,
+        -6.0,
+        6.0,
+        -6.0
+      ],
+      "expected_behavior": "MotorSpeed shall follow each requested direction transition and converge stably to the final negative reference direction.",
+      "test_design_technique": "Scenario-Based",
+      "rationale": "Exercises both reversal directions repeatedly in one scenario.",
+      "test_scope": "stress"
+    },
+    {
+      "original_candidate_id": "TC-021",
+      "candidate_id": "TC-021",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify Vcmd remains within the specified voltage limits for a moderate positive command.",
+      "precondition": "Run the MIL simulation with the constant SpeedRef for the complete simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        10.0
+      ],
+      "expected_behavior": "The observed maximum Vcmd shall be no greater than +12 V and the observed minimum Vcmd shall be no less than -12 V.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Checks voltage limitation during nominal positive operation.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-022",
+      "candidate_id": "TC-022",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify Vcmd remains within the specified voltage limits for a moderate negative command.",
+      "precondition": "Run the MIL simulation with the constant SpeedRef for the complete simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -10.0
+      ],
+      "expected_behavior": "The observed maximum Vcmd shall be no greater than +12 V and the observed minimum Vcmd shall be no less than -12 V.",
+      "test_design_technique": "Equivalence Partitioning",
+      "rationale": "Checks voltage limitation during nominal negative operation.",
+      "test_scope": "nominal"
+    },
+    {
+      "original_candidate_id": "TC-023",
+      "candidate_id": "TC-023",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify Vcmd limitation during a positive-to-negative reversal.",
+      "precondition": "Establish operation with the first SpeedRef segment, apply the second segment, and evaluate Vcmd extrema over the complete simulation interval.",
+      "input_type": "Piecewise-constant SpeedRef sequence",
+      "input_values": [
+        19.9,
+        -19.9
+      ],
+      "expected_behavior": "The observed maximum Vcmd shall be no greater than +12 V and the observed minimum Vcmd shall be no less than -12 V over the complete simulation interval.",
+      "test_design_technique": "Scenario-Based",
+      "rationale": "Exercises both voltage polarities and a reversal transient near the nominal speed-reference boundaries.",
+      "test_scope": "stress"
+    },
+    {
+      "original_candidate_id": "TC-024",
+      "candidate_id": "TC-024",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify Vcmd limitation under a high positive speed-reference stimulus.",
+      "precondition": "Run the MIL simulation with the constant SpeedRef for the complete simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        20.0
+      ],
+      "expected_behavior": "The observed maximum Vcmd shall be no greater than +12 V and the observed minimum Vcmd shall be no less than -12 V.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Provides a stress stimulus at the stated nominal-domain boundary while evaluating the explicit voltage limits.",
+      "test_scope": "stress"
+    },
+    {
+      "original_candidate_id": "TC-025",
+      "candidate_id": "TC-025",
+      "requirement_id": "REQ-VOLT-001",
+      "test_objective": "Verify Vcmd limitation under a high negative speed-reference stimulus.",
+      "precondition": "Run the MIL simulation with the constant SpeedRef for the complete simulation interval.",
+      "input_type": "Constant SpeedRef",
+      "input_values": [
+        -20.0
+      ],
+      "expected_behavior": "The observed maximum Vcmd shall be no greater than +12 V and the observed minimum Vcmd shall be no less than -12 V.",
+      "test_design_technique": "Boundary Value Analysis",
+      "rationale": "Provides a stress stimulus at the stated negative nominal-domain boundary while evaluating the explicit voltage limits.",
+      "test_scope": "stress"
+    }
+  ]
+}

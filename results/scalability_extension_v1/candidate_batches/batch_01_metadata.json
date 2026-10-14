@@ -1,0 +1,25 @@
+{
+  "batch_id": "B01",
+  "provider": "OpenAI",
+  "model": "gpt-5.6-luna",
+  "reasoning_effort": "medium",
+  "api_type": "Responses API",
+  "candidate_count_requested": 25,
+  "candidate_count_returned": 25,
+  "response_id": "resp_00d8a78cf75b52e1016acf38b28e6887d0be1310b6bb7223f6",
+  "usage_input_tokens": 1022,
+  "usage_output_tokens": 3658,
+  "usage_reasoning_tokens": 456,
+  "generation_timestamp": "2026-10-14T08:09:49.589842+00:00",
+  "git_commit": "6c40db325f9aa3f909b0309ee4eff9c51f42d647",
+  "git_branch": "feature/scalability-extension",
+  "source_hashes": {
+    "ai\\01_AI_Test_Basis.md": "FCA7AED1DA50E147EF6B21D965E91B4512648AC40A570D645CB7D14D56A3A0F0",
+    "ai\\prompt\\tc_generation_prompt.txt": "367E0AA59E6FBE52B48B9A8A186DC2D8E7BB316E442D41C007144B135DCE1347",
+    "ai\\output\\ai_generation_metadata.json": "D12D6C45410950C79711D47A6509525C798FC64C2004CCAC1290248F04DB4250",
+    "docs\\07_AI_Verification_Scalability_Protocol.md": "9DAE18E963FF84C9FE1E1EE043E69AA2B2989A29F52835B4AC04DCA4717A91E2",
+    "ai\\tc_schema.py": "0182D013EEC4D57F83A615709BAD0C8BD5542A8AFB1E1D1FE8D806B6395442A3",
+    "ai\\generate_test_cases.py": "5C1A1D9D1CC896FCC607ECACCF44A2FC7FF470C7A8FF78C19EA45CF3687B825E"
+  },
+  "generation_status": "SUCCESS"
+}
