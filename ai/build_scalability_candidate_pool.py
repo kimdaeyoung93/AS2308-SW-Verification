@@ -39,6 +39,7 @@ SCHEMA_PATH = ROOT / "ai" / "tc_schema.py"
 
 BASE_BATCH_IDS = tuple(f"B{index:02d}" for index in range(1, 6))
 FALLBACK_BATCH_ID = "B06"
+CAPACITY_BATCH_ID = "B07"
 REQUIREMENT_ORDER = (
     "REQ-VOLT-001",
     "REQ-TRK-001",
@@ -184,17 +185,26 @@ def batch_paths(batch_id: str) -> tuple[Path, Path]:
 
 
 def discover_batch_ids() -> tuple[str, ...]:
-    for path in sorted(BATCH_DIR.glob("batch_*_raw.json")):
-        match = re.fullmatch(r"batch_(\d{2})_raw\.json", path.name)
-        if match and int(match.group(1)) > 6:
-            raise ValueError(f"B07 or later is prohibited: {path}")
+    for path in sorted(BATCH_DIR.glob("batch_*_*.json")):
+        match = re.fullmatch(r"batch_(\d{2})_(?:raw|metadata)\.json", path.name)
+        if match and int(match.group(1)) > 7:
+            raise ValueError(f"B08 or later is prohibited: {path}")
     missing = [batch_id for batch_id in BASE_BATCH_IDS if not batch_paths(batch_id)[0].is_file()]
     if missing:
         raise FileNotFoundError("Missing required base batch raw files: " + ", ".join(missing))
     ids = list(BASE_BATCH_IDS)
-    fallback_raw, _ = batch_paths(FALLBACK_BATCH_ID)
+    fallback_raw, fallback_metadata = batch_paths(FALLBACK_BATCH_ID)
+    if fallback_raw.is_file() != fallback_metadata.is_file():
+        raise ValueError("B06 raw/metadata artifacts are incomplete")
     if fallback_raw.is_file():
         ids.append(FALLBACK_BATCH_ID)
+    capacity_raw, capacity_metadata = batch_paths(CAPACITY_BATCH_ID)
+    if capacity_raw.is_file() != capacity_metadata.is_file():
+        raise ValueError("B07 raw/metadata artifacts are incomplete")
+    if capacity_raw.is_file():
+        if FALLBACK_BATCH_ID not in ids:
+            raise ValueError("B07 is prohibited unless B06 exists")
+        ids.append(CAPACITY_BATCH_ID)
     return tuple(ids)
 
 
@@ -640,13 +650,9 @@ def write_artifacts(
     source_hashes: dict[str, str],
 ) -> str:
     result_status: str
-    fallback_allowed = len(batch_ids) == 5 and len(ordered) < FROZEN_POOL_SIZE
-    if len(ordered) >= FROZEN_POOL_SIZE:
-        result_status = "FROZEN_POOL_READY"
-    elif fallback_allowed:
-        result_status = "B06_REQUIRED"
-    else:
-        result_status = "POOL_TARGET_NOT_MET"
+    result_status = pool_status(len(batch_ids), len(ordered))
+    fallback_allowed = result_status == "B06_REQUIRED"
+    capacity_b07_allowed = result_status == "B07_REQUIRED"
 
     raw_payload = {
         "batch_ids": list(batch_ids),
@@ -704,6 +710,7 @@ def write_artifacts(
         "eligible_unique_executable_count": len(ordered),
         "frozen_candidate_count": frozen_count,
         "fallback_b06_allowed": str(fallback_allowed).lower(),
+        "capacity_b07_allowed": str(capacity_b07_allowed).lower(),
         "frozen_pool_sha256": frozen_hash,
         "ordering_rule_version": ORDERING_RULE_VERSION,
     }
@@ -728,6 +735,18 @@ def write_artifacts(
         metadata["artifact_sha256"][str(BUDGET_PATH.relative_to(ROOT))] = sha256_file(BUDGET_PATH)
     atomic_write_json(METADATA_PATH, metadata)
     return result_status
+
+
+def pool_status(batch_count: int, eligible_count: int) -> str:
+    if batch_count not in {5, 6, 7}:
+        raise ValueError(f"Unexpected batch count: {batch_count}")
+    if eligible_count >= FROZEN_POOL_SIZE:
+        return "FROZEN_POOL_READY"
+    if batch_count == 5:
+        return "B06_REQUIRED"
+    if batch_count == 6:
+        return "B07_REQUIRED"
+    return "POOL_TARGET_NOT_MET"
 
 
 def synthetic_candidate(candidate_id: str, requirement: str, values: list[float]) -> dict[str, Any]:
@@ -785,9 +804,15 @@ def self_check() -> None:
     assert [row["candidate"]["requirement_id"] for row in first[:4]] == list(REQUIREMENT_ORDER)
     processed, _ = process_rows(rows)
     assert sum(row["duplicate_status"] == "DUPLICATE" for row in processed) == 1
+    assert pool_status(5, 95) == "B06_REQUIRED"
+    assert pool_status(6, 95) == "B07_REQUIRED"
+    assert pool_status(7, 99) == "POOL_TARGET_NOT_MET"
+    assert pool_status(7, 100) == "FROZEN_POOL_READY"
     print("Scalability candidate pool synthetic self-check: PASS")
     print("deterministic ordering: PASS")
     print("protocol duplicate detection: PASS")
+    print("capacity states B06_REQUIRED/B07_REQUIRED/POOL_TARGET_NOT_MET: PASS")
+    print("B08 or later accepted: false")
     print("files written: false")
 
 
@@ -833,13 +858,24 @@ def main() -> int:
                     "B06 is not permitted because B01-B05 already provide "
                     f"{len(base_ordered)} eligible unique executable candidates"
                 )
+        if CAPACITY_BATCH_ID in batch_ids:
+            first_six_rows = [
+                row for row in raw_rows
+                if row["batch_id"] in (*BASE_BATCH_IDS, FALLBACK_BATCH_ID)
+            ]
+            _, first_six_ordered = process_rows(first_six_rows)
+            if len(first_six_ordered) >= FROZEN_POOL_SIZE:
+                raise ValueError(
+                    "B07 is not permitted because B01-B06 already provide "
+                    f"{len(first_six_ordered)} eligible unique executable candidates"
+                )
         records, ordered = process_rows(raw_rows)
         status = write_artifacts(batch_ids, raw_rows, records, ordered, source_hashes)
         print(f"candidate pool status: {status}")
         print(f"raw candidates: {len(raw_rows)}")
         print(f"eligible unique executable candidates: {len(ordered)}")
         print(f"results: {RESULT_ROOT}")
-        return 0 if status in {"FROZEN_POOL_READY", "B06_REQUIRED"} else 2
+        return 0 if status in {"FROZEN_POOL_READY", "B06_REQUIRED", "B07_REQUIRED"} else 2
     except Exception as error:
         print(f"ERROR: {error}")
         return 1

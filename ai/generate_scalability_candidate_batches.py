@@ -45,7 +45,8 @@ POOL_SUMMARY_PATH = RESULT_ROOT / "candidate_validation_summary.csv"
 
 BASE_BATCH_IDS = tuple(f"B{index:02d}" for index in range(1, 6))
 FALLBACK_BATCH_ID = "B06"
-ALLOWED_BATCH_IDS = (*BASE_BATCH_IDS, FALLBACK_BATCH_ID)
+CAPACITY_BATCH_ID = "B07"
+ALLOWED_BATCH_IDS = (*BASE_BATCH_IDS, FALLBACK_BATCH_ID, CAPACITY_BATCH_ID)
 
 
 def sha256_file(path: Path) -> str:
@@ -172,10 +173,10 @@ def prepare_request() -> dict[str, Any]:
     }
 
 
-def read_fallback_eligibility() -> tuple[int, bool]:
+def read_pool_summary() -> dict[str, str]:
     if not POOL_SUMMARY_PATH.is_file():
         raise FileNotFoundError(
-            "B06 requires candidate_validation_summary.csv produced after B01-B05"
+            "Capacity generation requires candidate_validation_summary.csv"
         )
     import csv
 
@@ -183,7 +184,11 @@ def read_fallback_eligibility() -> tuple[int, bool]:
         rows = list(csv.DictReader(handle))
     if len(rows) != 1:
         raise ValueError("candidate_validation_summary.csv must contain one row")
-    row = rows[0]
+    return rows[0]
+
+
+def read_fallback_eligibility() -> tuple[int, bool]:
+    row = read_pool_summary()
     try:
         count = int(row["eligible_unique_executable_count"])
     except (KeyError, ValueError) as error:
@@ -200,6 +205,58 @@ def assert_base_batches_complete() -> None:
     ]
     if missing:
         raise ValueError("B06 is blocked; missing completed base batches: " + ", ".join(missing))
+
+
+def assert_batches_complete(batch_ids: tuple[str, ...], action: str) -> None:
+    missing = [
+        batch_id
+        for batch_id in batch_ids
+        if not all(path.is_file() for path in batch_paths(batch_id))
+    ]
+    if missing:
+        raise ValueError(f"{action} is blocked; missing raw/metadata: " + ", ".join(missing))
+
+
+def assert_verification_not_started() -> None:
+    fixed = (
+        "healthy_execution_results.csv",
+        "healthy_segment_results.csv",
+        "mutation_execution_results.csv",
+        "mutation_kill_matrix.csv",
+        "runtime_summary.csv",
+        "metadata.txt",
+    )
+    evidence = [RESULT_ROOT / name for name in fixed if (RESULT_ROOT / name).exists()]
+    evidence.extend(RESULT_ROOT.glob("healthy_*_incomplete_*.csv"))
+    evidence.extend(RESULT_ROOT.glob("mutation_*_incomplete_*.csv"))
+    if evidence:
+        names = ", ".join(sorted(path.name for path in evidence))
+        raise ValueError(
+            "B07 is blocked because Healthy/Mutation execution evidence exists: " + names
+        )
+
+
+def assert_b07_eligibility() -> int:
+    assert_batches_complete((*BASE_BATCH_IDS, FALLBACK_BATCH_ID), "B07")
+    raw_path, metadata_path = batch_paths(CAPACITY_BATCH_ID)
+    if raw_path.exists() or metadata_path.exists():
+        raise FileExistsError("Refusing to overwrite existing batch artifacts for B07")
+    row = read_pool_summary()
+    expected_ids = ",".join((*BASE_BATCH_IDS, FALLBACK_BATCH_ID))
+    if row.get("batch_ids", "").replace(" ", "") != expected_ids:
+        raise ValueError("B07 requires a pool summary built from exactly B01-B06")
+    if row.get("batch_count", "").strip() != "6":
+        raise ValueError("B07 requires batch_count=6 in candidate_validation_summary.csv")
+    try:
+        eligible_count = int(row["eligible_unique_executable_count"])
+    except (KeyError, ValueError) as error:
+        raise ValueError("Pool summary has no valid eligible count") from error
+    if eligible_count >= 100:
+        raise ValueError("B07 is blocked because B01-B06 already meet the 100-case target")
+    if row.get("status", "").strip() not in {"POOL_TARGET_NOT_MET", "B07_REQUIRED"}:
+        raise ValueError("B07 requires the B01-B06 pool to be in a capacity-shortfall state")
+    assert_verification_not_started()
+    return eligible_count
 
 
 def generate_batch(batch_id: str, request: dict[str, Any]) -> None:
@@ -278,7 +335,8 @@ def dry_run(request: dict[str, Any]) -> None:
     print(f"candidates per batch: {CANDIDATE_BUDGET}")
     print(f"base batches: {', '.join(BASE_BATCH_IDS)}")
     print("fallback: B06 only when eligible unique executable count < 100")
-    print("B07 or later: prohibited")
+    print("one-time capacity extension: B07 after B01-B06 remain below 100")
+    print("B08 or later: prohibited")
     print(f"test basis: {TEST_BASIS_PATH}")
     print(f"prompt: {PROMPT_PATH}")
     print(f"output directory: {BATCH_DIR}")
@@ -293,6 +351,7 @@ def main() -> int:
     actions.add_argument("--dry-run", action="store_true")
     actions.add_argument("--generate-base", action="store_true")
     actions.add_argument("--generate-fallback-b06", action="store_true")
+    actions.add_argument("--generate-capacity-b07", action="store_true")
     args = parser.parse_args()
 
     try:
@@ -305,13 +364,19 @@ def main() -> int:
                 generate_batch(batch_id, request)
             return 0
 
-        assert_base_batches_complete()
-        eligible_count, fallback_allowed = read_fallback_eligibility()
-        if eligible_count >= 100 or not fallback_allowed:
-            raise ValueError(
-                "B06 is allowed only after B01-B05 when eligible count is below 100"
-            )
-        generate_batch(FALLBACK_BATCH_ID, request)
+        if args.generate_fallback_b06:
+            assert_base_batches_complete()
+            eligible_count, fallback_allowed = read_fallback_eligibility()
+            if eligible_count >= 100 or not fallback_allowed:
+                raise ValueError(
+                    "B06 is allowed only after B01-B05 when eligible count is below 100"
+                )
+            generate_batch(FALLBACK_BATCH_ID, request)
+            return 0
+
+        eligible_count = assert_b07_eligibility()
+        print(f"B07 capacity gate: B01-B06 eligible count={eligible_count} < 100")
+        generate_batch(CAPACITY_BATCH_ID, request)
         return 0
     except Exception as error:
         print(f"ERROR: {error}")

@@ -1,8 +1,8 @@
-# AS2308 AI-Assisted Verification Scalability Extension Protocol v1.0
+# AS2308 AI-Assisted Verification Scalability Extension Protocol v1.1
 
 | 항목 | 내용 |
 |---|---|
-| 문서 상태 | v1.0 Frozen — Approved for Implementation |
+| 문서 상태 | v1.1 Amended — One-Time B07 Capacity Extension |
 | 기준 branch | `feature/scalability-extension` |
 | Extension result root | `results/scalability_extension_v1/` |
 | V1 authoritative baseline | 변경하지 않음 |
@@ -55,18 +55,27 @@ Plant는 mutate하지 않는다. Mutation Set 확대는 본 실험 결과를 본
 - Candidates requested per batch: 25
 - 기본 raw target: 125 candidates
 - 사전 승인 fallback: `B06` 1회, 25 candidates
-- Maximum raw candidates: 150
+- one-time capacity extension: `B07` 1회, 25 candidates
+- Maximum raw candidates: 175
 - Frozen pool target: 100 schema-valid, semantic-valid, executable, unique Test Cases
 
 현재 `ai/generate_test_cases.py`의 strict Structured Output schema는 한 API response당 정확히 25개 candidate를 요구한다. Extension은 이 V1 schema 의미를 바꾸지 않고 batch-specific output을 보존하는 별도 orchestrator를 사용한다. 각 batch에는 `batch_id`, API response provenance 및 `original_candidate_id`를 기록하고, 전역 식별자는 deterministic하게 부여한다.
 
-### 3.2 125-to-100 capacity fallback rule
+### 3.2 125-to-100 capacity fallback 및 one-time extension rule
 
 125 raw candidates는 validation rejection과 cross-batch duplicate를 위한 attrition allowance를 제공하지만 100 unique candidates를 보장하지 않는다. 최초 `B01`~`B05`의 validation, deduplication 및 executable resolution 결과가 100개 미만일 때만 사전에 승인된 예비 batch `B06`을 정확히 1회 추가 생성한다.
 
 `B06` 실행 여부는 오직 eligible unique executable candidate count가 100 미만인지로 결정한다. Mutation, Coverage, SIL, Manual 결과 또는 예상 검출 효과는 이 결정에 사용하지 않는다. **B06는 사후 결과 조정이 아니라 Protocol에서 사전에 정의한 capacity fallback이다.**
 
-`B06` 처리 후에도 eligible candidate가 100개 미만이면 `POOL_TARGET_NOT_MET`으로 기록하고 Healthy/Mutation execution을 시작하지 않는다. `B07` 이상 자동 generation과 결과를 맞추기 위한 반복 regeneration은 금지한다.
+실제 `B01`~`B06` 처리 결과는 raw candidates 150개, schema/semantic valid 147개, duplicates 52개, eligible unique executable candidates 95개였다. 이 결과는 Healthy MIL 및 Mutation execution을 시작하기 전에 확인되었다. Frozen target 100개를 유지하기 위한 protocol amendment로 `B07`을 one-time capacity extension 25 candidates로 정확히 1회 허용한다. 이는 Mutation, Coverage, Healthy 또는 기타 검증 결과를 개선하기 위한 regeneration이 아니다.
+
+`B07`은 다음 조건을 모두 만족할 때만 사용할 수 있다.
+
+1. `B01`~`B06` raw 및 metadata artifact가 모두 정상 존재한다.
+2. `B01`~`B06`에 기존 validation, deduplication 및 executable resolution을 적용한 eligible unique executable candidate count가 100개 미만이다.
+3. Healthy MIL 및 Mutation execution이 아직 시작되지 않았다.
+
+`B07` 처리 후에도 eligible candidate가 100개 미만이면 `POOL_TARGET_NOT_MET`으로 최종 종료하고 Healthy/Mutation execution을 시작하지 않는다. `B08` 이상 generation은 금지한다. Schema validation, semantic validation, duplicate key, executable resolution 및 deterministic ordering rule은 v1.0에서 변경하지 않는다.
 
 100개를 초과하면 Section 7의 frozen ordering을 전체 eligible pool에 적용하고 처음 100개만 frozen pool로 채택한다. 나머지는 `VALID_UNSELECTED_CAPACITY`로 보존하며 삭제하지 않는다.
 
@@ -155,7 +164,7 @@ Resolution이 불가능한 candidate는 `EXECUTABLE_RESOLUTION_REJECTED`로 기�
 
 각 raw candidate에는 다음 identity를 기록한다.
 
-- `batch_id`: 기본 `B01`~`B05`, fallback 사용 시 `B06`
+- `batch_id`: 기본 `B01`~`B05`, fallback 사용 시 `B06`, v1.1 one-time capacity extension 사용 시 `B07`
 - `original_candidate_id`: LLM response의 ID
 - `extension_candidate_id`: `EXT-Bxx-<original_candidate_id>`를 filename-safe하게 정규화한 값
 - `canonical_duplicate_key_sha256`: Section 5.3 tuple의 UTF-8 canonical JSON SHA-256
@@ -314,7 +323,7 @@ Extension artifact는 기존 V1 result와 분리하여 `results/scalability_exte
 
 권장 파일:
 
-- `candidate_batches/batch_01_raw.json` ~ `batch_05_raw.json`, fallback 사용 시 `batch_06_raw.json`
+- `candidate_batches/batch_01_raw.json` ~ `batch_05_raw.json`, fallback 사용 시 `batch_06_raw.json`, v1.1 amendment 사용 시 `batch_07_raw.json`
 - `candidate_pool_raw.json`
 - `candidate_pool_raw.csv`
 - `candidate_validation_results.csv`
@@ -368,7 +377,9 @@ Git에 commit하는 Extension artifact는 다음으로 freeze한다.
 | Batch API/schema infrastructure failure | 해당 batch 실패 기록, 자동 retry 없이 generation phase 중단 |
 | Individual semantic rejection | candidate rejection reason 기록; eligible count 계산 계속 |
 | `B01`~`B05` 후 eligible unique candidate 100개 미만 | 사전 승인 `B06` 1회 생성 |
-| `B06` 후에도 100개 미만 | `POOL_TARGET_NOT_MET`; Healthy/Mutation 실행 금지 |
+| `B01`~`B06` 후 eligible unique candidate 100개 미만이며 Healthy/Mutation 미실행 | v1.1 one-time capacity extension `B07` 1회 생성 |
+| `B07` 후에도 100개 미만 | `POOL_TARGET_NOT_MET`; Healthy/Mutation 실행 금지 |
+| `B08` 이상 generation 요청 | 금지; generation 시작 전 중단 |
 | 형식 통일/deduplication non-determinism | `POOL_BUILD_ERROR`; artifact와 hash 보존 후 중단 |
 | Executable resolution failure | candidate별 rejection 기록; 최종 eligible count가 100 미만이면 중단 |
 | Healthy baseline gate failure | `HEALTHY_BASELINE_GATE_FAILED`; Mutation 실행 금지 |
@@ -397,7 +408,7 @@ V1 artifact를 보존하기 위해 기존 scripts를 직접 확장하기보다 �
 
 | Planned script | Purpose |
 |---|---|
-| `ai/generate_scalability_candidate_batches.py` | 기본 5개 batch와 조건부 `B06` 생성 및 batch별 raw/provenance 저장 |
+| `ai/generate_scalability_candidate_batches.py` | 기본 5개 batch, 조건부 `B06`, v1.1 조건부 one-time `B07` 생성 및 batch별 raw/provenance 저장 |
 | `ai/build_scalability_candidate_pool.py` | validation 결과 병합, 형식 통일, deduplication, ordering, 100-candidate freeze |
 | `ai/build_scalability_execution_spec.py` | frozen pool을 기존 2.0 s adapter semantics로 resolved spec 변환 |
 | `runner/run_ai_scalability_suite.m` | arbitrary ordered pool의 Healthy MIL 실행 및 runtime/status 수집 |
@@ -421,7 +432,7 @@ AI API generation은 Python generation phase이므로 MATLAB master runner에 �
 Implementation은 다음 결정에서 벗어나지 않는다.
 
 1. Provider/model/configuration은 V1 candidate generation과 동일한 설정을 사용한다. Exact identity와 usage/cost는 run metadata에 기록하며 API 비용 자체는 Protocol blocking condition이 아니다.
-2. 기본 generation은 `B01`~`B05`, 각 25 candidates이다. Eligible pool이 100개 미만일 때만 `B06` 1회를 사용하며 최대 raw count는 150이다. `B07` 이상은 자동 생성하지 않는다.
+2. 기본 generation은 `B01`~`B05`, 각 25 candidates이다. Eligible pool이 100개 미만일 때 `B06` 1회를 사용한다. `B01`~`B06` 결과가 95개였고 Healthy/Mutation execution이 시작되지 않았으므로 v1.1 amendment에서 `B07` 1회를 허용하며 최대 raw count는 175이다. `B08` 이상은 생성하지 않는다.
 3. Candidate raw content, batch ID, original/global candidate ID, validation/deduplication 결과와 허용된 provider/model/response metadata를 보존한다. API key와 전체 raw API response envelope은 보존하지 않는다.
 4. Ordering은 Requirement round-robin과 candidate-content SHA-256 ordering으로 고정한다. Mutation/Coverage/SIL/Manual result는 ordering에 사용하지 않는다.
 5. Automatic timeout을 구현하지 않는다. Elapsed time과 MATLAB/Simulink 오류를 기록하고 automatic retry는 0으로 한다.
@@ -429,9 +440,13 @@ Implementation은 다음 결정에서 벗어나지 않는다.
 7. Section 12의 Git/artifact policy를 적용한다. 기존 incomplete/raw evidence를 사후 삭제하거나 V1 result를 overwrite하지 않는다.
 8. MATLAB master runner는 frozen pool 이후의 preflight, Healthy MIL, gate, Healthy PASS 대상 Mutation, 집계 및 완료 상태를 조정한다. AI API generation은 포함하지 않는다.
 
-본 v1.0 Protocol은 위 implementation semantics를 승인한다. 실제 실행은 구현·preflight 검토 후 별도 사용자 명령으로 시작한다.
+본 v1.1 Amended Protocol은 기존 implementation semantics를 유지하면서 위 one-time `B07` capacity extension만 승인한다. Healthy/Mutation execution은 frozen 100-candidate pool이 준비된 뒤 별도 사용자 명령으로 시작한다.
 
 ## 17. Revision Note
+
+### v1.1 Amended — One-Time B07 Capacity Extension
+
+`B01`~`B06`의 candidate-only 처리 결과 eligible unique executable candidates가 95개임을 Healthy MIL 및 Mutation execution 전에 확인하였다. Frozen 100-case target을 유지하기 위해 동일한 provider/model/prompt/schema와 기존 validation, deduplication, executable resolution 및 ordering rule을 사용하는 `B07` 25 candidates를 one-time capacity extension으로 승인한다. Maximum raw candidates는 175이며 `B08` 이상은 금지한다. `B07` 이후에도 100개 미만이면 `POOL_TARGET_NOT_MET`으로 최종 종료한다.
 
 ### v1.0 Frozen — Approved for Implementation
 
