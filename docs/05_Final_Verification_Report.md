@@ -6,6 +6,7 @@
 | Requirements baseline | `requirements/01_Requirements.md` v1.1 Frozen |
 | MIL baseline | `model/AS2308_MIL_Baseline_v3.slx` |
 | SIL protocol | `docs/04_SIL_BackToBack_Protocol_v1.2.md` v1.2 Frozen |
+| Traceability baseline | `docs/06_Requirements_Traceability_Matrix.md` |
 | 작성 원칙 | Repository에 보존된 frozen protocol과 결과 artifact만 사용하며 새 실험이나 새 acceptance criterion을 도입하지 않음 |
 
 ## 1. Project Objective
@@ -36,7 +37,7 @@ MIL DUT는 `AS2308_MIL_Baseline_v3/PI Speed Controller`이며, verification refe
 | Plant state | Continuous transfer function |
 | Verified MATLAB/Simulink environment | MATLAB R2023b / Simulink 23.2 |
 
-Parameter와 execution metadata는 source-to-derived gate 및 SIL 결과에 보존되어 있다. (`results/source_derived_equivalence_v1/metadata.txt`, `results/sil_b2b_phase_b_v1/metadata.txt`)
+Parameter relation과 anti-windup topology는 frozen source script/model을 저장하지 않고 read-only로 확인했으며, execution configuration은 gate와 SIL metadata에도 보존되어 있다. (`results/static_requirement_verification_v1/static_verification_summary.csv`, `results/static_requirement_verification_v1/metadata.txt`, `results/source_derived_equivalence_v1/metadata.txt`, `results/sil_b2b_phase_b_v1/metadata.txt`)
 
 `0.0004 s`는 이 모델의 fixed-step numerical integration 간격이다. 현재 controller와 plant는 continuous dynamics를 유지하므로 이를 standalone discrete controller execution period 또는 검증된 400 us real-time deadline으로 해석하지 않는다. Plant 또한 speed-domain 검증을 위한 저차 모델이며 실제 BLDC의 current, PWM, encoder 및 detailed electrical transient 전체를 1차로 모델링했다고 주장하지 않는다.
 
@@ -49,6 +50,7 @@ Actual BLDC experiment
   -> voltage-to-speed plant identification
   -> frozen MIL baseline
   -> frozen requirements and environment
+  -> read-only static/configuration verification
   -> Manual requirements-based Test Suite
   -> deterministic MATLAB Oracles
   -> Model Coverage measurement
@@ -69,17 +71,25 @@ MIL requirement compliance와 SIL equivalence는 서로 다른 목적이다. MIL
 
 Frozen Requirements v1.1은 source-backed requirement와 derived functional requirement를 구분한다. (`requirements/01_Requirements.md`)
 
-| Requirement | Verification role |
-|---|---|
-| `REQ-VOLT-001` | 전체 simulation에서 controller output `Vcmd`가 `[-12,+12] V`에 있는지 확인 |
-| `REQ-TRK-001` | 일정한 valid reference와 persistent actuator saturation이 없는 조건에서 MotorSpeed가 reference로 수렴하는지 확인 |
-| `REQ-DIR-001` | Non-zero positive/negative reference에 대해 steady-state MotorSpeed 방향이 일치하는지 확인 |
-| `REQ-REV-001` | 정상 운전 setup 이후 reference sign reversal에 대해 새 방향과 tracking convergence를 확인 |
-| `REQ-AW-001` | `Kas = Kis/Kps` anti-windup 구조 보존을 static/configuration evidence와 supplemental dynamic assessment로 확인; 임의 recovery-time criterion은 없음 |
+| Requirement | Verification method | Final result | Primary evidence |
+|---|---|---|---|
+| `REQ-VOLT-001` | 전체 simulation의 deterministic Voltage Oracle | Manual 2/2 `PASS`; AI 2/2 `PASS` | Corrected healthy baseline CSVs |
+| `REQ-BW-001` | Frozen source script의 `f_cs` read-only static/configuration check | Static `PASS`: observed `f_cs = 40 Hz` | `results/static_requirement_verification_v1/static_verification_summary.csv` |
+| `REQ-PI-001` | `Kps = w_cs/b`, `Kis = a*Kps` relation과 model gain expression 비교 | Static `PASS`: Kps/Kis expected-observed difference 각각 0 | `results/static_requirement_verification_v1/static_verification_summary.csv` |
+| `REQ-AW-001` | Anti-windup feedback topology와 `Kas = Kis/Kps` relation의 read-only inspection | Static `PASS`: topology 존재, Kas expected-observed difference 0 | `results/static_requirement_verification_v1/static_verification_summary.csv` |
+| `REQ-TRK-001` | Healthy-baseline applicability gate 후 deterministic Tracking Oracle | Manual 2/2 `PASS`·`APPLICABLE`; AI 3/3 `PASS`·`APPLICABLE` | Corrected healthy baseline CSVs |
+| `REQ-DIR-001` | Deterministic Direction Oracle | Manual 2/2 `PASS`; AI 2/2 `PASS` | Corrected healthy baseline CSVs |
+| `REQ-REV-001` | Pre-reversal setup과 post-reversal outcome에 Direction + Tracking Oracle 적용 | Manual 3/3 `PASS`; AI 2/2 `PASS`; setup `ESTABLISHED` | Corrected healthy baseline CSVs |
+
+표의 corrected healthy baseline evidence는 `results/manual_mutation_corrected_v1/Manual_Corrected_Healthy_Baseline.csv`와 `results/ai_mutation_corrected_v1/AI_Corrected_Healthy_Baseline.csv`를 의미한다. Requirement별 Test Case, Oracle, mutation 및 SIL 연결은 `docs/06_Requirements_Traceability_Matrix.md`를 따른다.
+
+Static Verification은 Polyspace-style code static analysis가 아니다. `model/AS2308_calculate_pi_control_cc.m`과 frozen Simulink configuration/topology를 read-only로 확인한 결과이며, model hash는 검사 전후 authoritative value를 유지하고 model은 저장되지 않았다. (`results/static_requirement_verification_v1/metadata.txt`)
+
+`REQ-AW-001`의 static `PASS`는 anti-windup feedback 구조와 `Kas = Kis/Kps` relation에만 적용된다. Dynamic anti-windup recovery effectiveness에는 공식 compliance Oracle이나 threshold를 정의하지 않았으며 dynamic `PASS`로 판정하지 않았다.
 
 환경 제약은 `ts = 0.0004 s`, identified plant, filter-free reference path와 필수 `2*pi` unit conversion, nominal `|SpeedRef| < 20 rps` 원칙을 고정한다. Saturation stress는 nominal verification과 구분한다. `steady-state error <= 1%`, `overshoot <= 5%`, `settling time <= 0.25 s`, `reversal settling time <= 0.30 s` 같은 source에 없는 수치는 acceptance criterion으로 사용하지 않았다.
 
-Manual Dynamic MIL Suite v1.0은 5 logical Test Case와 9 top-level executions로 구성되었다. Corrected healthy baseline은 9/9 `PASS`, tracking 대상은 `APPLICABLE`, reversal setup은 `ESTABLISHED`, execution error는 0이었다. Repeated reversal인 MTC-005는 첫 plateau를 setup으로 취급하고 이후 required transition 5/5를 통과하였다. (`results/manual_mutation_corrected_v1/Manual_Corrected_Healthy_Baseline.csv`)
+Manual Dynamic Compliance Suite v1.0의 authoritative count는 5 logical Test Cases와 9 top-level executions이다. Corrected healthy baseline은 9/9 `PASS`, tracking 대상은 `APPLICABLE`, reversal setup은 `ESTABLISHED`, execution error는 0이었다. Repeated reversal인 MTC-005는 첫 plateau를 setup으로 취급하고 이후 required transition 5/5를 통과하였다. Official AI Suite도 corrected semantics에서 9/9 `PASS`, inconclusive 0, execution error 0이었다. (`results/manual_mutation_corrected_v1/Manual_Corrected_Healthy_Baseline.csv`, `results/ai_mutation_corrected_v1/AI_Corrected_Healthy_Baseline.csv`)
 
 ## 5. Deterministic Oracle
 
@@ -259,6 +269,7 @@ Build evidence에는 duration group `1, 2, 4, 8, 12 s`별 첫 execution에서 �
 
 | Verification item | Final result | Primary evidence | Interpretation |
 |---|---|---|---|
+| Static Requirements | `REQ-BW-001`, `REQ-PI-001`, `REQ-AW-001` static PASS | `results/static_requirement_verification_v1/static_verification_summary.csv` | Frozen script/configuration/topology relation 확인; AW dynamic recovery PASS를 의미하지 않음 |
 | MIL Healthy — Manual | 9/9 PASS | `results/manual_mutation_corrected_v1/Manual_Corrected_Healthy_Baseline.csv` | Frozen Manual dynamic executions가 corrected semantics에서 정상 동작 |
 | MIL Healthy — AI | 9/9 PASS, inconclusive 0, error 0 | `results/ai_mutation_corrected_v1/AI_Corrected_Healthy_Baseline.csv` | Frozen Official AI executions가 동일 adjudication semantics에서 정상 동작 |
 | Model Coverage | Execution 10/10, Decision 4/4; Condition/MC/DC N/A | `results/manual_suite_v1_coverage_summary.csv` | Applicable structural objectives fully exercised; defect absence 의미는 아님 |
@@ -268,11 +279,11 @@ Build evidence에는 duration group `1, 2, 4, 8, 12 s`별 첫 execution에서 �
 | SIL Phase A | 3/3 EXECUTION_OK; all max/RMS diffs 0 | `results/sil_b2b_characterization_v1_1/` | Characterization evidence; 당시 equivalence PASS/FAIL은 정의하지 않음 |
 | SIL Phase B | 15/15 PASS, 0 FAIL, 0 error; exact equality 15/15 | `results/sil_b2b_phase_b_v1/` | Frozen host SIL environment와 independent scenarios에서 numerical equivalence 확인 |
 
-주요 provenance commit은 unified mutation correction `5367241`, source-to-derived gate `26ed2db`, SIL observation validation `a51e339`, Phase A characterization `9205c76`, numerical criterion freeze `789cb7d`, independent Phase B verification `2a3ccf1`이다. (`git log --oneline`)
+주요 provenance commit은 unified mutation correction `5367241`, source-to-derived gate `26ed2db`, SIL observation validation `a51e339`, Phase A characterization `9205c76`, numerical criterion freeze `789cb7d`, independent Phase B verification `2a3ccf1`, final report baseline `1356440`, RTM/static evidence `90cd316`이다. (`git log --oneline`)
 
 ## 16. Limitations and Conclusion
 
-본 evidence가 확인한 범위는 identified reduced-order plant를 사용한 requirements-based MIL behavior, DUT structural coverage, frozen controller mutations에 대한 detection, 두 9-execution Suite의 제한된 비교, 그리고 current host SIL configuration에서 generated-code numerical equivalence이다.
+본 evidence가 확인한 범위는 frozen controller configuration relation과 anti-windup topology, identified reduced-order plant를 사용한 requirements-based MIL behavior, DUT structural coverage, frozen controller mutations에 대한 detection, 두 9-execution Suite의 제한된 비교, 그리고 current host SIL configuration에서 generated-code numerical equivalence이다. Anti-windup dynamic recovery effectiveness는 공식 compliance PASS/FAIL 범위에 포함되지 않는다.
 
 다음은 검증하지 않았다.
 
@@ -286,4 +297,4 @@ Build evidence에는 duration group `1, 2, 4, 8, 12 s`별 첫 execution에서 �
 - 모든 possible input/state에 대한 수학적 equivalence
 - 다른 model, requirement set 또는 mutation set으로의 Manual/AI 결과 일반화
 
-결론적으로 이 repository는 frozen requirement와 environment에서 자동 반복 가능한 MIL verification, deterministic Oracle 판정, Coverage 및 Mutation 기반 Test Suite effectiveness 평가, 독립된 AI-assisted candidate generation/selection, 그리고 source traceability를 유지한 generated-code host SIL Back-to-Back verification을 하나의 재현 가능한 흐름으로 구축하였다. Manual과 AI Suite 모두 frozen six-mutant set을 100% 검출했다. AI Suite는 이 frozen experiment에서 18/54 kill cells를 기록해 Manual Suite의 14/54보다 4개 더 많은 kill cell을 만들었으며, 이는 해당 Suite, 해당 fault set 및 동일 9 top-level execution budget에 한정된 결과다. Source-to-derived gate, Phase A 및 independent Phase B에서는 required signals의 numerical difference가 모두 0이었으며 Phase B 15/15가 frozen criterion을 통과했다. 이 결론은 위에 명시한 model, scenarios, tools 및 host configuration 범위에 한정된다.
+결론적으로 이 repository는 frozen requirement와 environment에서 read-only static/configuration verification, 자동 반복 가능한 MIL verification, deterministic Oracle 판정, Coverage 및 Mutation 기반 Test Suite effectiveness 평가, 독립된 AI-assisted candidate generation/selection, 그리고 source traceability를 유지한 generated-code host SIL Back-to-Back verification을 하나의 재현 가능한 흐름으로 구축하였다. Manual과 AI Suite 모두 frozen six-mutant set을 100% 검출했다. AI Suite는 이 frozen experiment에서 18/54 kill cells를 기록해 Manual Suite의 14/54보다 4개 더 많은 kill cell을 만들었으며, 이는 해당 Suite, 해당 fault set 및 동일 9 top-level execution budget에 한정된 결과다. Source-to-derived gate, Phase A 및 independent Phase B에서는 required signals의 numerical difference가 모두 0이었으며 Phase B 15/15가 frozen criterion을 통과했다. 이 결론은 위에 명시한 model, scenarios, tools 및 host configuration 범위에 한정되며 AI의 일반적 우수성이나 모든 input/state에 대한 mathematical equivalence를 주장하지 않는다.
