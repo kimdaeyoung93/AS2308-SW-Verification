@@ -64,6 +64,8 @@ function [summaryTable, segmentTable, runData] = run_ai_scalability_suite(vararg
         'Voltage Oracle');
     localAssertFile(fullfile(runnerDirectory, ...
         'scalability_stimulus_harness.m'), 'Scalability stimulus harness');
+    localAssertFile(fullfile(runnerDirectory, ...
+        'scalability_reversal_plan.m'), 'Scalability reversal plan');
     addpath(oracleDirectory);
 
     parameters = localProjectParameters();
@@ -279,6 +281,17 @@ function localValidateSpecification(specification, pool, parameters)
             'run_ai_scalability_suite:ProfileResolutionFailure', ...
             'Generic stimulus profile resolution failed for %s.', ...
             specification.extension_candidate_id(rowIndex));
+        if specification.requirement_id(rowIndex) == "REQ-REV-001"
+            plan = scalability_reversal_plan(values);
+            intervals = jsondecode(char( ...
+                specification.evaluation_intervals_s(rowIndex)));
+            specifiedTargets = reshape([intervals.segment_index], 1, []);
+            assert(isequal(plan.target_segments, specifiedTargets), ...
+                'run_ai_scalability_suite:ReversalTargetMismatch', ...
+                ['MATLAB reversal targets differ from the frozen Python ', ...
+                 'execution specification for %s.'], ...
+                specification.extension_candidate_id(rowIndex));
+        end
     end
 end
 
@@ -394,12 +407,18 @@ function [summaryRow, detailRows] = localEvaluateCandidate( ...
     detailRows = repmat(localEmptySegmentRow(), count, 1);
     required = strings(0, 1); applicabilityResults = strings(0, 1);
     plateauPass = false(count, 1); reversalSetup = "NOT_REQUIRED";
+    reversalPlan = struct();
+    if specRow.requirement_id == "REQ-REV-001"
+        reversalPlan = scalability_reversal_plan(values);
+    end
     fullVoltage = struct();
     if specRow.requirement_id == "REQ-VOLT-001"
         fullVoltage = evaluate_voltage_limit(signals.time, signals.vcmd, parameters.Vdc);
         required(end + 1, 1) = localPassFail(fullVoltage.pass);
     end
     previousSign = 0;
+    previousNonzeroPass = false;
+    previousNonzeroSegment = NaN;
     for segmentIndex = 1:count
         startTime = (segmentIndex - 1) * specRow.segment_duration_s;
         endTime = segmentIndex * specRow.segment_duration_s;
@@ -444,21 +463,36 @@ function [summaryRow, detailRows] = localEvaluateCandidate( ...
                 required(end + 1, 1) = detail.tracking_result; %#ok<AGROW>
             end
         elseif specRow.requirement_id == "REQ-REV-001"
-            direction = evaluate_direction(t, r, speed);
-            tracking = evaluate_tracking(t, r, speed);
-            plateauPass(segmentIndex) = direction.pass && tracking.pass;
-            detail.direction_result = localPassFail(direction.pass);
-            detail.tracking_result = localPassFail(tracking.pass);
             currentSign = sign(values(segmentIndex));
-            reversed = previousSign ~= 0 && currentSign ~= 0 && currentSign ~= previousSign;
-            if segmentIndex == 1
+            if currentSign == 0
+                detail.applicability = "NOT_EVALUATED";
+                detail.setup_status = "NOT_EVALUATED";
+            else
+                direction = evaluate_direction(t, r, speed);
+                tracking = evaluate_tracking(t, r, speed);
+                plateauPass(segmentIndex) = direction.pass && tracking.pass;
+                detail.direction_result = localPassFail(direction.pass);
+                detail.tracking_result = localPassFail(tracking.pass);
+            end
+            if currentSign ~= 0 && ...
+                    segmentIndex == reversalPlan.setup_segment
                 if plateauPass(segmentIndex)
                     reversalSetup = "ESTABLISHED"; detail.setup_status = "ESTABLISHED";
                 else
                     reversalSetup = "NOT_ESTABLISHED"; detail.setup_status = "NOT_ESTABLISHED";
                 end
-            elseif reversed
-                if ~plateauPass(segmentIndex - 1)
+            end
+            targetPosition = find( ...
+                reversalPlan.target_segments == segmentIndex, 1);
+            if ~isempty(targetPosition)
+                expectedPreviousSegment = ...
+                    reversalPlan.previous_nonzero_segments(targetPosition);
+                assert(previousSign ~= 0 && currentSign ~= 0 && ...
+                    currentSign ~= previousSign && ...
+                    previousNonzeroSegment == expectedPreviousSegment, ...
+                    'run_ai_scalability_suite:ReversalStateMismatch', ...
+                    'Previous nonzero reversal state is inconsistent.');
+                if ~previousNonzeroPass
                     applicabilityResults(end + 1, 1) = "PRECONDITION_NOT_MET"; %#ok<AGROW>
                     detail.transition_result = "INCONCLUSIVE_PRECONDITION";
                 elseif plateauPass(segmentIndex)
@@ -469,7 +503,11 @@ function [summaryRow, detailRows] = localEvaluateCandidate( ...
                     detail.transition_result = "FAIL";
                 end
             end
-            if currentSign ~= 0; previousSign = currentSign; end
+            if currentSign ~= 0
+                previousSign = currentSign;
+                previousNonzeroPass = plateauPass(segmentIndex);
+                previousNonzeroSegment = segmentIndex;
+            end
         elseif specRow.requirement_id == "REQ-VOLT-001"
             segmentVoltage = evaluate_voltage_limit(t, vcmd, parameters.Vdc);
             detail.voltage_result = localPassFail(segmentVoltage.pass);

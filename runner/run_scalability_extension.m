@@ -22,6 +22,11 @@ function result = run_scalability_extension(varargin)
         % evidence is created later by the Execute=true workflow.
         failures=strings(0,1);
         try
+            self_check_scalability_reversal_plan();
+        catch ME
+            failures(end+1)=string(ME.identifier)+": "+string(ME.message); %#ok<AGROW>
+        end
+        try
             verify_scalability_stimulus_harness('Execute',false);
         catch ME
             failures(end+1)=string(ME.identifier)+": "+string(ME.message); %#ok<AGROW>
