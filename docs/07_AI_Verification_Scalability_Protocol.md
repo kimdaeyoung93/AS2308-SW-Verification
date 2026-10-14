@@ -160,6 +160,12 @@ LLM 또는 embedding 기반 의미 판단은 duplicate judge로 사용하지 않
 
 Resolution이 불가능한 candidate는 `EXECUTABLE_RESOLUTION_REJECTED`로 기록하며 대체 candidate를 사후 생성하지 않는다. Eligible pool에 이미 100개 이상 있으면 frozen ordering의 다음 candidate가 자연스럽게 100-candidate cutoff 안으로 들어온다.
 
+#### Generic piecewise-constant stimulus harness implementation note
+
+Frozen pool의 executable candidate는 segment 개수나 값 반복 형태와 무관한 arbitrary piecewise-constant SpeedRef sequence를 포함할 수 있다. MATLAB execution adapter는 frozen source model `AS2308_MIL_Baseline_v3.slx`를 저장하거나 수정하지 않고, run마다 source의 temporary verification copy를 만든다. 이 temporary copy에서는 기존 stimulus source만 zero-order-hold semantics의 `From Workspace` source로 대체하며, 각 ordered SpeedRef value를 정확히 `2.0 s` 유지한다. 기존 Manual Switch downstream, rps-to-rad/s conversion, PI Speed Controller, Plant, parameters, logged signals 및 Mutation target topology는 유지한다.
+
+이 harness는 DUT/Plant 변경이 아니라 test stimulus infrastructure이다. Source model SHA-256은 harness 사용 전후 확인하고 temporary copy는 실행 종료 후 삭제한다. Requested profile과 logged `reference`는 각 segment에서 deterministic하게 확인하며 mismatch는 `EXECUTION_ERROR`이다. Pulse Generator로의 silent fallback, sequence 압축, candidate 삭제·교체는 허용하지 않는다. 기존 source stimulus로 표현 가능한 representative constant/two-level/alternating cases에 대한 별도 harness equivalence check는 scalability requirement result와 분리하며 PASS/FAIL tuning에 사용하지 않는다.
+
 ## 6. Frozen Candidate Identity
 
 각 raw candidate에는 다음 identity를 기록한다.
@@ -447,6 +453,8 @@ Implementation은 다음 결정에서 벗어나지 않는다.
 ### v1.1 Amended — One-Time B07 Capacity Extension
 
 `B01`~`B06`의 candidate-only 처리 결과 eligible unique executable candidates가 95개임을 Healthy MIL 및 Mutation execution 전에 확인하였다. Frozen 100-case target을 유지하기 위해 동일한 provider/model/prompt/schema와 기존 validation, deduplication, executable resolution 및 ordering rule을 사용하는 `B07` 25 candidates를 one-time capacity extension으로 승인한다. Maximum raw candidates는 175이며 `B08` 이상은 금지한다. `B07` 이후에도 100개 미만이면 `POOL_TARGET_NOT_MET`으로 최종 종료한다.
+
+Implementation note: frozen candidate semantics를 실행하기 위해 runtime-only generic piecewise-constant stimulus harness를 사용한다. 이는 source model, DUT, Plant, Oracle, Mutation Set, frozen pool/order/hash 또는 `2.0 s` segment semantics를 변경하지 않는다.
 
 ### v1.0 Frozen — Approved for Implementation
 
