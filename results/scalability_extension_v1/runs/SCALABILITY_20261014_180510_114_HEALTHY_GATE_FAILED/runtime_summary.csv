@@ -1,0 +1,2 @@
+run_id,healthy_execution_count,mutation_execution_count,total_execution_count,healthy_elapsed_time_s,mutation_elapsed_time_s,total_simulation_elapsed_time_s,average_execution_time_s,healthy_fail_count,healthy_inconclusive_count,execution_error_count,automatic_retry_count,completion_status
+SCALABILITY_20261014_180510_114,100,0,100,23.7626508,0,23.7626508,0.237626508,0,0,4,0,HEALTHY_BASELINE_GATE_FAILED
