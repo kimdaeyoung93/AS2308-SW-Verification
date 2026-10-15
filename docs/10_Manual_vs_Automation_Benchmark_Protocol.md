@@ -142,13 +142,19 @@ manual_speedref = [
 
 `[0.0, -4.0]`은 첫 행을 `[0.0, 0.0]`, 두 번째 행을 `[2.0, -4.0]`으로 직접 입력하고 Stop Time을 4.0 s로 설정한다.
 
-## 7. 수동 판정 기준
+## 7. Automated Healthy semantics와 동일한 수동 판정
 
-판정에는 logged `reference`, `motorspeed`, `Vcmd`를 사용한다. Data Inspector cursor, signal table 또는 Command Window의 기본 indexing, `max`, `min`, `abs`, `sign`을 이용할 수 있지만, Test Case별 metric 계산 helper나 자동 PASS/FAIL script를 만들지 않는다.
+Manual 판정은 `runner/run_ai_scalability_suite.m`의 Healthy BASELINE evaluation logic을 그대로 따른다. 판정에는 logged `reference`, `motorspeed`, `Vcmd`, `raw_pi_output`을 사용한다. Data Inspector cursor, signal table 또는 Command Window의 기본 indexing, `max`, `min`, `abs`, `sign`을 이용할 수 있지만, Test Case별 metric helper나 자동 판정 script를 만들지 않는다.
 
-### 7.1 VOLT — REQ-VOLT-001
+### 7.1 Frozen evaluation interval
 
-Simulation 전체 구간의 모든 `Vcmd` sample을 확인한다.
+각 행의 `evaluation_scope`, `evaluation_window_s`, `evaluation_intervals_s`는 authoritative execution specification에서 복사한 값이다. 사용자는 `evaluation_intervals_s`에 기록된 interval과 segment index를 그대로 사용하며 terminal window를 임의로 이동하거나 다시 정의하지 않는다. `0.05 s`는 frozen project evaluation setting이며 새로운 acceptance criterion이나 product performance requirement가 아니다.
+
+`applicability_check_required=true`인 TRK 행은 Tracking metric보다 applicability를 먼저 판정한다. REV 행의 `evaluation_intervals_s`는 reportable reversal target window를 식별한다. REV setup precondition은 Section 7.5에 따라 previous non-zero plateau의 terminal 0.05 s를 사용한다.
+
+### 7.2 VOLT — REQ-VOLT-001
+
+`evaluation_scope=complete_simulation_interval`인 전체 simulation 구간에서 모든 `Vcmd` sample을 확인한다.
 
 ```text
 max(Vcmd) <= +12 V
@@ -156,27 +162,59 @@ AND
 min(Vcmd) >= -12 V
 ```
 
-두 조건을 모두 만족하면 PASS, 아니면 FAIL이다. Numerical tolerance를 추가하지 않는다.
+두 조건을 모두 만족하면 PASS, 아니면 FAIL이다. Numerical tolerance를 추가하지 않는다. `raw_pi_output`은 VOLT PASS/FAIL에 사용하지 않는다.
 
-### 7.2 DIR — REQ-DIR-001
+### 7.3 DIR — REQ-DIR-001
 
-평가 대상 terminal plateau의 마지막 0.05 s에 있는 모든 sample을 확인한다. Non-zero `reference`와 `motorspeed`의 부호가 모든 sample에서 동일하면 PASS, 하나라도 다르면 FAIL이다. Tracking accuracy는 DIR 판정에 포함하지 않는다.
+Sheet의 terminal `evaluation_intervals_s`에 있는 모든 sample을 확인한다. 해당 interval의 `reference`는 non-zero constant여야 하며 모든 sample에서 다음을 만족하면 PASS이다.
 
-### 7.3 TRK — REQ-TRK-001
+```text
+reference .* motorspeed > 0
+```
 
-평가 대상 plateau의 마지막 0.05 s에서 모든 sample의 speed error를 확인한다.
+하나라도 만족하지 않으면 FAIL이다. Tracking accuracy, settling performance 또는 minimum speed magnitude는 DIR 판정에 포함하지 않는다.
+
+### 7.4 TRK — REQ-TRK-001 applicability와 판정
+
+각 `evaluation_intervals_s`의 terminal 0.05 s에 대해 먼저 persistent actuator clamp를 확인한다. 필요한 신호는 `reference`, `motorspeed`, `Vcmd`, `raw_pi_output`이다.
+
+Window의 모든 sample에서 다음 positive 또는 negative clamp 조건 중 하나가 지속되면 해당 segment는 `PRECONDITION_NOT_MET`이다.
+
+```text
+positive clamp: raw_pi_output > +12 V
+                AND abs(Vcmd - 12 V) <= clamp_tolerance
+
+negative clamp: raw_pi_output < -12 V
+                AND abs(Vcmd + 12 V) <= clamp_tolerance
+
+clamp_tolerance = 64 * eps(max([1; abs(Vcmd(window)); 12]))
+```
+
+이 machine-scale tolerance는 automated runner가 Vcmd의 clamp equality를 확인할 때 사용하는 기존 수치 처리이며 Tracking acceptance threshold가 아니다. Persistent clamp이면 Tracking metric을 적용하지 않고 `manual_applicability=PRECONDITION_NOT_MET`, `manual_result=INCONCLUSIVE_PRECONDITION`으로 기록한다.
+
+Persistent clamp가 아니면 `manual_applicability=APPLICABLE`로 기록하고 같은 frozen interval에서 다음을 확인한다.
 
 ```text
 max(abs(reference - motorspeed)) <= 1e-9 rps
 ```
 
-조건을 만족하면 PASS, 아니면 FAIL이다. `1e-9 rps`는 이 project의 numerical-zero tolerance이며 product performance requirement가 아니다.
+조건을 만족하면 PASS, 아니면 FAIL이다. `1e-9 rps`는 project-specific numerical-zero tolerance이며 product performance requirement가 아니다. Multi-segment TRK에서 어느 evaluation segment라도 precondition을 충족하지 못하면 Test Case 결과는 `INCONCLUSIVE_PRECONDITION`이다. 판정 대상 segment에서 Tracking FAIL이 있으면 FAIL이 우선한다.
 
-### 7.4 REV — REQ-REV-001
+### 7.5 REV — REQ-REV-001 previous-nonzero semantics
 
-실제 sign reversal이 발생한 target plateau에 대해 DIR rule과 TRK rule을 모두 적용한다. 두 rule이 모두 PASS인 경우에만 REV PASS이고, 하나라도 FAIL이면 REV FAIL이다.
+REV는 단순히 마지막 plateau만 확인하지 않는다. Segment를 시간 순서대로 검토한다.
 
-Zero-reference intermediate segment가 있으면 zero segment는 remembered direction을 바꾸지 않는다. Reversal target은 직전 non-zero plateau의 sign과 반대인 다음 non-zero plateau이며, previous non-zero plateau semantics를 사용한다.
+- `reference == 0`: Direction과 Tracking을 평가하지 않고 `NOT_EVALUATED`로 둔다. Previous non-zero state를 변경하지 않는다.
+- `reference ~= 0`: 해당 plateau의 terminal 0.05 s에서 DIR과 TRK를 평가한다. Plateau combined pass는 `Direction PASS AND Tracking PASS`이다.
+- Current non-zero sign이 previous non-zero sign과 반대이면 current segment가 reversal target이다.
+
+Reversal target의 previous non-zero plateau가 combined PASS여야 setup precondition이 성립한다.
+
+- Previous non-zero plateau가 combined PASS가 아니면 `manual_applicability=PRECONDITION_NOT_MET`, `manual_result=INCONCLUSIVE_PRECONDITION`이다.
+- Previous non-zero plateau가 combined PASS이고 current reversal target도 combined PASS이면 PASS이다.
+- Setup precondition은 충족했지만 current reversal target의 Direction 또는 Tracking이 FAIL이면 FAIL이다.
+
+Zero intermediate가 있어도 직전 segment가 아니라 previous non-zero plateau를 사용한다. 예를 들어 `[5, 0, -5]`에서 reversal target은 segment 3이고 setup plateau는 segment 1이다. REV에서 setup precondition이 충족되면 summary-level `manual_applicability`는 automated Healthy result와 같이 `NOT_REQUIRED`로 기록한다.
 
 ## 8. 공정성 규칙
 
@@ -188,8 +226,11 @@ Zero-reference intermediate segment가 있으면 zero segment는 remembered dire
 - Frozen prefix 25의 Test Case ordering을 유지한다.
 - Manual benchmark는 25개 전체를 사용자가 한 번씩 직접 수행한다.
 - 이후 automation benchmark도 동일한 frozen 25개를 사용한다.
+- Manual과 Automation은 동일한 frozen evaluation interval 및 PASS, FAIL, INCONCLUSIVE semantics를 사용한다.
+- Manual은 사람이 stimulus 설정, 실행, 신호 확인, 판정, 기록을 직접 수행하고 Automation은 runner가 동일 workflow를 수행한다.
 - 측정 중 automation runner를 사용하지 않는다.
 - Typing mistake가 발생하면 실제 manual workflow의 일부로 바로 수정하되 retry를 숨기거나 시간을 제외하지 않는다.
+- 결과를 확인한 뒤 protocol을 수정하지 않는다. 수정이 필요하면 benchmark를 시작하지 않고 protocol과 sheet를 먼저 수정하여 다시 동결한다.
 
 ## 9. 결과 기록
 
@@ -198,10 +239,24 @@ Zero-reference intermediate segment가 있으면 zero segment는 remembered dire
 - `manual_start_time`
 - `manual_end_time`
 - `manual_elapsed_s`
+- `manual_applicability`
 - `manual_result`
 - `notes`
 
 기존 Healthy 결과나 예상 PASS/FAIL을 미리 입력하지 않는다.
+
+`manual_result`에 허용되는 값은 다음 네 가지뿐이다.
+
+- `PASS`
+- `FAIL`
+- `INCONCLUSIVE_PRECONDITION`
+- `EXECUTION_ERROR`
+
+`manual_applicability`는 Healthy summary semantics에 맞춰 기록한다. VOLT와 DIR은 `NOT_REQUIRED`, applicable TRK는 `APPLICABLE`, persistent-clamp TRK는 `PRECONDITION_NOT_MET`이다. REV는 setup precondition이 충족되면 `NOT_REQUIRED`, 충족되지 않으면 `PRECONDITION_NOT_MET`이다.
+
+입력 실수 또는 simulation failure로 유효한 신호와 판정을 얻지 못하면 PASS/FAIL을 추정하지 않고 `EXECUTION_ERROR`와 원인을 `notes`에 기록한다. 해당 Test Case만 재시도하여 시간이나 결과를 유리하게 바꾸지 않는다.
+
+다음 중 하나가 발생하면 개별 행을 선택적으로 재시도하지 말고 전체 benchmark run을 무효 처리한다: frozen 순서 또는 evaluation interval 위반, 측정 중 automated runner나 기존 Healthy 결과 참조, stopwatch 구간 누락, environment 변경, 또는 중단 후 일부 Test Case만 재개한 경우. 재측정이 필요하면 원인을 기록하고 TC #1부터 새 run으로 다시 시작한다.
 
 ## 10. 결과 해석 제한
 
